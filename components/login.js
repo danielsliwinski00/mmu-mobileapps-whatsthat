@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Text, TextInput, View, Button, Alert,  } from 'react-native';
-
-let emailValid = 0;
-let passwordValid = 0;
+import { TouchableOpacity } from 'react-native-web';
+import styles from './stylesheet.js';
+import validation from './validation.js';
 
 class SignUp extends Component {
   constructor(props){
@@ -13,24 +13,6 @@ class SignUp extends Component {
     }
   }
 
-  emailValidate = (text) => {
-    if(text.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)){
-      emailValid = 1;
-    }
-    else{
-      emailValid = 0;
-    } 
-  }
-
-  passwordValidate = (text) => {
-    if(text.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z])[a-zA-Z0-9!@#$%^&*]{8,16}$/)){
-      passwordValid = 1;
-    }
-    else{
-      passwordValid = 0;
-    } 
-  }
-
   emailChange = (text) => {
     this.setState({email: text})
   }
@@ -39,51 +21,35 @@ class SignUp extends Component {
     this.setState({password: text})
   }
 
-  login = (email, password) => {
-    this.emailValidate(email)
-    this.passwordValidate(password)
-    if(emailValid == 1){
-      if(passwordValid == 1){
-        alert(
-          "your email and password are valid"
-        )
-      }
-      else{
-        alert(
-          "your password is not valid"
-        )
-        location.reload()
-      }
-    }
-    else{
-      alert(
-        "your email is not valid"
-      )
-      location.reload()
-    }
-    }
-
   render() {
     return (
-      <View>
-        <TextInput
+      <View style={[styles.view]}>
+        <TextInput 
+          style={[styles.text]}
           placeholder='Email'
           value={this.state.email}
           onChangeText={this.emailChange}
         />
-        <TextInput
+        <TextInput 
+          style={styles.text}
           placeholder='Password'
           value={this.state.password}
           onChangeText={this.passwordChange}
         />
-        <Button
+        <TouchableOpacity 
+          style={styles.box}
           title='Log In'
-          onPress={ () => this.login(this.state.email, this.state.password)}
-        />
-        <Button 
+          onPress={ () => validation(this.state.email, this.state.password)}>
+          <Text style={styles.text}>Log in
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.box}
           title="Home"
-          onPress={()=> this.props.navigation.navigate('Home')}
-          />
+          onPress={()=> this.props.navigation.navigate('Home')}>
+            <Text style={styles.text}>Home
+            </Text>
+        </TouchableOpacity>
       </View>
     )
   }
