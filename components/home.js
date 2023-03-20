@@ -20,6 +20,11 @@ class HomeScreen extends Component{
             <Text style={[styles.text]}>API</Text>
           </TouchableOpacity >
 
+          <TouchableOpacity style={[styles.box]}
+            onPress={()=> this.props.navigation.navigate('Sign up')}>
+            <Text style={[styles.text]}>Sign Up</Text>
+          </TouchableOpacity >
+
         </View>
     );
   }

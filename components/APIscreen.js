@@ -9,9 +9,53 @@ class API extends Component {
         super(props);
         this.state = {
             isLoading: true,
-            shoppingListData: []
+            ListData: [], 
+            id: '',
+            item_name: '',
+            description: '',
+            unit_price: '',
+            quantity: ''
+      
         }
     }
+
+    deleteItem(id){
+        return fetch('http://10.0.2.2:3333/list/' + id, {
+            method: 'delete'
+          })
+          .then((response) => {
+              this.getData();
+          })
+          .then((response) => {
+    
+            Alert.alert("Item deleted")
+    
+          })
+          .catch((error) =>{
+            console.log(error);
+          });
+      }    
+
+    addItem(){
+        return fetch("http://10.0.2.2:3333/list",
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/js' },
+          body: JSON.stringify({
+            id: this.state.id,
+            item_name: this.state.item_name,
+            description: this.state.description,
+            unit_price: this.state.unit_price,
+            quantity: this.state.quantity
+          })
+        })
+        .then((response) => {
+          Alert.alert("Item Added!");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      }
 
     getData() {
         return fetch('http://localhost:3333/list')
@@ -20,7 +64,7 @@ class API extends Component {
 
                 this.setState({
                     isLoading: false,
-                    shoppingListData: responseJson,
+                    ListData: responseJson,
                 });
 
             })
@@ -47,7 +91,7 @@ class API extends Component {
         return (
             <View>
                 <FlatList
-                    data={this.state.shoppingListData}
+                    data={this.state.ListData}
                     renderItem={({ item }) => <Text style={styles.text}>{item.item_name} - {item.description}</Text>}
                     keyExtractor={({ id }, index) => id}
                 />

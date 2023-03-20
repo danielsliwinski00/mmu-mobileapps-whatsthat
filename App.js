@@ -1,6 +1,7 @@
 import * as React from 'react';
 import HomeScreen from '/components/home.js'
 import LogIn from './components/login.js'
+import SignUp from './components/signup'
 import API from './components/APIscreen.js'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -17,6 +18,10 @@ export default function App(){
         options={{headerTitle:"", headerTransparent:true}}
         />
         <Stack.Screen name="API" component={API}
+        options={{headerTitle:"", headerTransparent:true}}
+        />
+        <Stack.Screen name="Sign up" component={SignUp}
+        options={{headerTitle:"", headerTransparent:true}}
         />
       </Stack.Navigator>
     </NavigationContainer>
