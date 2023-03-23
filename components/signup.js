@@ -31,7 +31,7 @@ class SignUp extends Component {
         })
       })
       .then((response) => {
-        alert("Account created");
+        this.props.navigation.navigate('Log in');
       })
       .catch((error) => {
         console.error(error);
@@ -59,7 +59,7 @@ class SignUp extends Component {
       this.addUser();
     }
     else{
-      alert("Inccorect details");
+      alert("Incorect details");
     }
   }
 
