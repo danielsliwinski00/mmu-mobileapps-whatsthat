@@ -55,11 +55,29 @@ class SignUp extends Component {
   }
 
   validate(){
-    if(validation(this.state.email, this.state.password)==true){
+    if(this.validateEmail() && this.validatePassword()==true){
       this.addUser();
     }
     else{
       alert("Incorect details");
+    }
+  }
+
+    validateEmail() {
+    if (validation(this.state.email, 'email') == true) {
+      return true;
+    }
+    else {
+      alert("Incorect email");
+    }
+  }
+
+  validatePassword() {
+    if (validation(this.state.password, 'password') == true) {
+      return true;
+    }
+    else {
+      alert("Incorect password");
     }
   }
 

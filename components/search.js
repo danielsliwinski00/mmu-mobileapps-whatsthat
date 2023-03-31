@@ -1,13 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { Component } from 'react';
 import { FlatList, ActivityIndicator, Text, TextInput, View, Button, Alert, } from 'react-native';
 import { TouchableOpacity } from 'react-native-web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
 
 class SignUp extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -71,6 +70,7 @@ daniel.sliwinski.00@gmail.com
         }
         return(
             <View style={[styles.view]}>
+                {console.log(this.state.searchData)}
                 <FlatList
                     data={this.state.searchData}
                     renderItem={({item}) => <Text style={styles.text}>{item.given_name} {item.family_name} - {item.email}</Text>}

@@ -4,7 +4,7 @@ import { Text, View, Button, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-web';
 import styles from './stylesheet.js';
 
-class appHome extends Component {
+class AppHome extends Component {
 
     async logOut() {
         return fetch("http://localhost:3333/api/1.0.0/logout",
@@ -17,10 +17,12 @@ class appHome extends Component {
                     await AsyncStorage.removeItem("whatsthatID")
                     await AsyncStorage.removeItem("whatsthatSessionToken")
                     this.props.navigation.navigate('Home');
-                } 
+                }
                 else if (response.status == 401) {
-                    throw "Unauthorised"
-                } 
+                    await AsyncStorage.removeItem("whatsthatID")
+                    await AsyncStorage.removeItem("whatsthatSessionToken")
+                    this.props.navigation.navigate('Home');
+                }
                 else {
                     throw "Something went wrong"
                 }
@@ -29,8 +31,6 @@ class appHome extends Component {
                 console.log(error);
             });
     }
-
-
 
     render() {
         return (
@@ -48,9 +48,13 @@ class appHome extends Component {
                     <Text style={[styles.text]}>Log out</Text>
                 </TouchableOpacity >
 
+                <TouchableOpacity style={[styles.box]}
+                    onPress={() => this.props.navigation.navigate('Profile')}>
+                    <Text style={[styles.text]}>Profile</Text>
+                </TouchableOpacity >
             </View>
         );
     }
 }
 
-export default appHome;
+export default AppHome;

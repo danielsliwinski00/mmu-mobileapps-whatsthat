@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert, } from 'react-native';
+import { Text, TextInput, View, Button, Alert, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { TouchableOpacity } from 'react-native-web';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
@@ -10,7 +9,9 @@ class SignUp extends Component {
     super(props);
     this.state = {
       email: "",
-      password: ""
+      password: "",
+      emailTest:'email@mail.com',
+      passwordTest:'Password1!',
     }
   }
 
@@ -20,13 +21,12 @@ class SignUp extends Component {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          "email": this.state.email,
-          "password": this.state.password
+          "email": this.state.emailTest,
+          "password": this.state.passwordTest
         })
       })
       .then((response) => {
         if(response.status == 200){
-          this.props.navigation.navigate('appHome');
           return response.json();
         }else if(response.status == 400){
           throw "Invalid email or password"
@@ -38,6 +38,9 @@ class SignUp extends Component {
         try{
           await AsyncStorage.setItem("whatsthatID", responseJson.id)
           await AsyncStorage.setItem("whatsthatSessionToken", responseJson.token)
+          this.setState({email: "",
+          password: "",})
+          this.props.navigation.navigate('AppHome');
         }catch{
           throw "something went wrong"
         }
@@ -82,7 +85,7 @@ class SignUp extends Component {
         <TouchableOpacity 
           style={styles.box}
           title='Log In'
-          onPress={ () => this.validate()}>
+          onPress={ () => this.login()}>
           <Text style={styles.text}>Log in
           </Text>
         </TouchableOpacity>
