@@ -6,22 +6,17 @@ import styles from './stylesheet.js';
 class HomeScreen extends Component {
   render() {
     return (
-      <View style={[{ flex: 1 }]}>
-        <View style={[styles.viewHome, { flex: 4, backgroundColor: '#ffffff', padding:0, }]}>
+      <View style={[{ flex: 1, }]}>
+        <View style={[styles.viewHome, { flex: 1, padding:0, }]}>
 
-          <View style={[{ flex: 1, backgroundColor: 'cyan'}]}>
-            <Text style={[styles.text]}>Home Screen</Text>
+          <View style={[{ flex: 1, backgroundColor: '#412234'}]}>
+            <Text style={[styles.text, {color:'#ffffff', alignSelf:'center'}]}>Home</Text>
           </View>
 
-          <View style={[{ flex: 6 , backgroundColor: 'white' }]}>
+          <View style={[{ flex: 11 , justifyContent:'flex-end' }]}>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.props.navigation.navigate('Log in')}>
               <Text style={[styles.text]}>Log in</Text>
-          </TouchableOpacity >
-
-          <TouchableOpacity style={[styles.box]}
-            onPress={() => this.props.navigation.navigate('API')}>
-            <Text style={[styles.text]}>API</Text>
           </TouchableOpacity >
 
           <TouchableOpacity style={[styles.box]}
@@ -31,11 +26,11 @@ class HomeScreen extends Component {
           </View>
 
         </View>
-        <View style={{ flex: 1, backgroundColor: '#000000' }}>
-        </View>
       </View>
     );
   }
 }
 
 export default HomeScreen;
+/*        <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        </View> */

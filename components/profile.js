@@ -17,12 +17,15 @@ class Profile extends Component {
       email: "",
       password: "",
       dataReceived: false,
+      fnameChanged: false,
+      lnameChanged: false,
+      emailChanged: false,
       passwordChanged: false,
     }
   }
 
   async userInfo() {
-    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+    return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
       {
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
       })
@@ -30,7 +33,7 @@ class Profile extends Component {
         return response.json();
       })
       .then((responseJson) => {
-        console.log(responseJson)
+        //console.log(responseJson)
         this.setState({
           profileData: responseJson,
           isLoading: false,
@@ -40,21 +43,96 @@ class Profile extends Component {
         console.log(error);
       });
   }
+  async updateUserRequest(){
+    if(this.state.fnameChanged==true){
+      await this.updateUserFName();
+    }
+    if(this.state.lnameChanged==true){
+      await this.updateUserLName();
+    }
+    if(this.state.emailChanged==true){
+      if(this.validateEmail(this.state.email, "email")==true){
+        await this.updateUserEmail();
+      }
+    }
+    if(this.state.passwordChanged==true){
+      if(this.validatePassword(this.state.password, "password")==true){
+        await this.updateUserPassword();
+      }
+    }
+    this.userInfo();
+    this.setState({
+      profileEdit: false,
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      fnameChanged: false,
+      lnameChanged: false,
+      emailChanged: false,
+      passwordChanged: false,
+    })
+  }
 
-  async updateUserInfo() {
-    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+  async updateUserFName() {
+    return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
         body: JSON.stringify({
           'first_name': this.state.firstName,
+        })
+      })
+      .then((response) => {
+        console.log("successfully changed first name");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  async updateUserLName() {
+    return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+        body: JSON.stringify({
           'last_name': this.state.lastName,
+        })
+      })
+      .then((response) => {
+        console.log("successfully changed last name");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  async updateUserEmail() {
+    return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+        body: JSON.stringify({
           'email': this.state.email,
+        })
+      })
+      .then((response) => {
+        console.log("successfully changed email");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+  async updateUserPassword() {
+    return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+        body: JSON.stringify({
           'password': this.state.password,
         })
       })
       .then((response) => {
-        this.setState({ profileEdit: false })
+        console.log("successfully changed password");
       })
       .catch((error) => {
         console.log(error);
@@ -63,16 +141,27 @@ class Profile extends Component {
 
   updateUser() {
     if (this.state.firstName == '') {
-      this.setState({ firstName: this.state.profileData.first_name })
+      this.setState({
+        fnameChanged: false,
+      })
     }
     if (this.state.lastName == '') {
-      this.setState({ lastName: this.state.profileData.last_name })
+      this.setState({
+        lnameChanged: false,
+      })
     }
     if (this.state.email == '') {
-      this.setState({ email: this.state.profileData.email })
+      this.setState({
+        emailChanged: false,
+      })
+    }
+    if (this.state.password == '') {
+      this.setState({ 
+        passwordChanged: false 
+      })
     }
 
-    this.updateUserInfo();
+    this.updateUserRequest();
   }
 
   validateEmail() {
@@ -80,7 +169,7 @@ class Profile extends Component {
       return true;
     }
     else {
-      alert("Incorect email");
+      alert("Incorect email format");
     }
   }
 
@@ -89,24 +178,24 @@ class Profile extends Component {
       return true;
     }
     else {
-      alert("Incorect password");
+      alert("Incorect password format");
     }
   }
 
   firstNameChange = (text) => {
-    this.setState({ firstName: text })
+    this.setState({ firstName: text, fnameChanged: true, })
   }
 
   lastNameChange = (text) => {
-    this.setState({ lastName: text })
+    this.setState({ lastName: text, lnameChanged: true, })
   }
 
   emailChange = (text) => {
-    this.setState({ email: text })
+    this.setState({ email: text, emailChanged: true,})
   }
 
   passwordChange = (text) => {
-    this.setState({ password: text })
+    this.setState({ password: text, passwordChanged: true, })
   }
 
   async componentDidMount() {
@@ -116,97 +205,118 @@ class Profile extends Component {
   render() {
     if (this.state.isLoading == true) {
       return (
-        <View style={[styles.view]}>
-          <ActivityIndicator />
-        </View>
+        <View style={[styles.view, { marginTop: 400, alignSelf: 'center' }]}>
+                    <ActivityIndicator />
+                </View>
       );
     }
     if (this.state.profileEdit == true) {
       return (
-        <View style={[styles.view]}>
-          <Text style={[styles.text]}>
-            First Name: {this.state.profileData.first_name}
-          </Text>
-          <TextInput
-            style={[styles.text, { placeholderTextColor: 'grey' }]}
-            placeholder="name"
-            value={this.state.firstName}
-            onChangeText={this.firstNameChange}
-          />
-          <Text style={[styles.text]}>
-          Last Name: {this.state.profileData.last_name}
-          </Text>
-          <TextInput
-            style={[styles.text, { placeholderTextColor: 'grey' }]}
-            placeholder='Last Name'
-            value={this.state.lastName}
-            onChangeText={this.lastNameChange}
-          />
-          <Text style={[styles.text]}>
-          Email: {this.state.profileData.email}
-          </Text>
-          <TextInput
-            style={[styles.text, { placeholderTextColor: 'grey' }]}
-            placeholder='Email'
-            value={this.state.email}
-            onChangeText={this.emailChange}
-          />
-          <Text style={[styles.text]}>
-         Password: {this.state.profileData.email}
-          </Text>
-          <TextInput
-            style={[styles.text, { placeholderTextColor: 'grey' }]}
-            placeholder='Password'
-            value={this.state.password}
-            onChangeText={this.passwordChange}
-          />
-          <TouchableOpacity
-            style={styles.box}
-            title='updatebtn'
-            onPress={() => this.updateUser()}>
-            <Text style={styles.text}>Update User Info
+        <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
+        <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+          <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
+            <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+              Edit Profile
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.box}
-            title='updatebtn'
-            onPress={() => this.setState({
-              profileEdit:false,
-            })}>
-            <Text style={styles.text}>Cancel
+          </View>
+          <View style={[{ flex: 9, justifyContent: 'flex-start' }]}>
+            <Text style={[styles.text]}>
+              First Name: {this.state.profileData.first_name}
             </Text>
-          </TouchableOpacity>
+            <TextInput
+              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              placeholder="First Name"
+              value={this.state.firstName}
+              onChangeText={this.firstNameChange}
+            />
+            <Text style={[styles.text]}>
+              Last Name: {this.state.profileData.last_name}
+            </Text>
+            <TextInput
+              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              placeholder='Last Name'
+              value={this.state.lastName}
+              onChangeText={this.lastNameChange}
+            />
+            <Text style={[styles.text]}>
+              Email: {this.state.profileData.email}
+            </Text>
+            <TextInput
+              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              placeholder='Email'
+              value={this.state.email}
+              onChangeText={this.emailChange}
+            />
+            <Text style={[styles.text]}>
+              Password:
+            </Text>
+            <TextInput
+              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              placeholder='Password'
+              value={this.state.password}
+              onChangeText={this.passwordChange}
+            />
+          </View>
+          <View style={[{ flex: 2, justifyContent: 'flex-end' }]}>
+            <TouchableOpacity
+              style={styles.box}
+              title='updatebtn'
+              onPress={() => this.updateUser()}>
+              <Text style={styles.text}>Update User Info
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.box}
+              title='updatebtn'
+              onPress={() => this.setState({
+                profileEdit: false,
+              })}>
+              <Text style={styles.text}>Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         </View>
       )
     }
     return (
-      <View style={[styles.view]}>
-        <Text style={[styles.text]}>
-          {this.state.profileData.first_name}
-        </Text>
-        <Text style={styles.text}> </Text>
+      <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
+        <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+          <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
+            <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+              Profile
+            </Text>
+          </View>
+          <View style={[{ flex: 7, justifyContent: 'flex-start' }]}>
+          <Text style={[styles.text]}>
+            First Name: {this.state.profileData.first_name}
+          </Text>
+          <Text style={styles.text}> </Text>
 
-        <Text style={[styles.text]}>
-          {this.state.profileData.last_name}
-        </Text>
-        <Text style={styles.text}> </Text>
+          <Text style={[styles.text]}>
+            Last Name: {this.state.profileData.last_name}
+          </Text>
+          <Text style={styles.text}> </Text>
 
-        <Text style={[styles.text]}>
-          {this.state.profileData.email}
-        </Text>
-        <Text style={styles.text}> </Text>
-
-        <TouchableOpacity style={[styles.box]} 
-        onPress={() => this.setState({ profileEdit: true })}>
-          <Text style={[styles.text]}>Update Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+          <Text style={[styles.text]}>
+            Email: {this.state.profileData.email}
+          </Text>
+          <Text style={styles.text}> </Text>
+        </View>
+        <View style={[{ flex: 4, justifyContent: 'flex-end' }]}>
+          <TouchableOpacity style={[styles.box]}
+            onPress={() => this.setState({ profileEdit: true })}>
+            <Text style={[styles.text]}>Update Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.box}
             title="Home"
             onPress={() => this.props.navigation.navigate('AppHome')}>
             <Text style={styles.text}>Home
             </Text>
           </TouchableOpacity>
+        </View>
+      </View>
       </View>
     );
   }

@@ -7,7 +7,7 @@ import styles from './stylesheet.js';
 class AppHome extends Component {
 
     async logOut() {
-        return fetch("http://localhost:3333/api/1.0.0/logout",
+        return fetch("http://192.168.1.209:3333/api/1.0.0/logout",
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -34,25 +34,35 @@ class AppHome extends Component {
 
     render() {
         return (
-            <View style={[styles.view]}>
+            <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
+                <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                    <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
+                        <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+                            Home
+                        </Text>
+                    </View>
+                    <Text style={[styles.text]}>Welcome</Text>
+                    <View style={[{ flex: 1, justifyContent: 'flex-start' }]}>
+                    </View>
+                    <View style={[{ flex: 10, justifyContent: 'flex-end' }]}>
 
-                <Text style={[styles.text]}>Home Screen</Text>
+                        <TouchableOpacity style={[styles.box]}
+                            onPress={() => this.props.navigation.navigate('Contacts')}>
+                            <Text style={[styles.text]}>Contacts</Text>
+                        </TouchableOpacity >
 
-                <TouchableOpacity style={[styles.box]}
-                    onPress={() => this.props.navigation.navigate('Search')}>
-                    <Text style={[styles.text]}>Search</Text>
-                </TouchableOpacity >
+                        <TouchableOpacity style={[styles.box]}
+                            onPress={() => this.props.navigation.navigate('Profile')}>
+                            <Text style={[styles.text]}>Profile</Text>
+                        </TouchableOpacity >
 
-                <TouchableOpacity style={[styles.box]}
-                    onPress={() => this.logOut()}>
-                    <Text style={[styles.text]}>Log out</Text>
-                </TouchableOpacity >
-
-                <TouchableOpacity style={[styles.box]}
-                    onPress={() => this.props.navigation.navigate('Profile')}>
-                    <Text style={[styles.text]}>Profile</Text>
-                </TouchableOpacity >
-            </View>
+                        <TouchableOpacity style={[styles.box]}
+                            onPress={() => this.logOut()}>
+                            <Text style={[styles.text]}>Log out</Text>
+                        </TouchableOpacity >
+                    </View>
+                </View>
+            </View >
         );
     }
 }
