@@ -5,8 +5,10 @@ import SignUp from './components/signup'
 import Profile from './components/profile.js'
 import AppHome from './components/apphome.js'
 import Contacts from './components/contacts.js'
+import Search from './components/search.js'
+import Blocked from './components/blocked.js'
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, HeaderBackButton  } from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator()
 
 export default function App() {
@@ -22,6 +24,12 @@ export default function App() {
             headerTintColor: '#ffffff'
           }}
         />
+        <Stack.Screen name="Search" component={Search}
+          options={{
+            headerTitle: "", headerTransparent: true,
+            headerTintColor: '#ffffff'
+          }}
+        />
         <Stack.Screen name="Sign up" component={SignUp}
           options={{
             headerTitle: "", headerTransparent: true,
@@ -31,7 +39,8 @@ export default function App() {
         <Stack.Screen name="AppHome" component={AppHome}
           options={{
             headerTitle: "", headerTransparent: true,
-            headerTintColor: '#ffffff'
+            headerTintColor: '#ffffff',
+            headerLeft:null,
           }}
         />
         <Stack.Screen name="Profile" component={Profile}
@@ -43,7 +52,14 @@ export default function App() {
                 <Stack.Screen name="Contacts" component={Contacts}
           options={{
             headerTitle: "", headerTransparent: true,
-            headerTintColor: '#ffffff'
+            headerTintColor: '#ffffff',
+          }}
+        />
+                <Stack.Screen name="Blocked" component={Blocked}
+          options={{
+            headerTitle: "", headerTransparent: true,
+            headerTintColor: '#ffffff',
+
           }}
         />
       </Stack.Navigator>

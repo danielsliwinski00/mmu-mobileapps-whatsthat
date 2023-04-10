@@ -47,16 +47,33 @@ const styles = StyleSheet.create({
         width: 50,
     },
     contactSearch: {
-        width: 270, 
-        height:50,
-        marginRight: 20, 
-        color: '#2e4052', 
-        textAlign: 'center', 
-        fontSize: 28, 
-        placeholderTextColor: 'gray', 
-        backgroundColor:'#2e405210',
-        borderRadius:10,
-    }
+        width: 270,
+        height: 50,
+        marginRight: 20,
+        color: '#2e4052',
+        textAlign: 'center',
+        fontSize: 28,
+        placeholderTextColor: 'gray',
+        backgroundColor: '#2e405210',
+        borderRadius: 10,
+    },
+    contactOptions: {
+        marginTop: -5,
+        height: 50,
+        width: undefined,
+        aspectRatio: 0.2,
+        alignSelf: 'center',
+    },
+    optionsPanelContacts: {
+        position: 'absolute',
+        backgroundColor: '#e7e8e9',
+        height: 120,
+        width: 200,
+        right: 0, //-210,
+        top: 140,
+        borderBottomLeftRadius:20,
+        borderTopLeftRadius:20,
+    },
 })
 
 export default styles;
