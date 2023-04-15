@@ -47,6 +47,11 @@ class AppHome extends Component {
                     <View style={[{ flex: 10, justifyContent: 'flex-end' }]}>
 
                         <TouchableOpacity style={[styles.box]}
+                            onPress={() => this.props.navigation.navigate('Chats')}>
+                            <Text style={[styles.text]}>Chats</Text>
+                        </TouchableOpacity >
+
+                        <TouchableOpacity style={[styles.box]}
                             onPress={() => this.props.navigation.navigate('Contacts')}>
                             <Text style={[styles.text]}>Contacts</Text>
                         </TouchableOpacity >
