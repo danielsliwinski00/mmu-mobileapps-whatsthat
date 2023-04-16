@@ -9,8 +9,8 @@ class HomeScreen extends Component {
       <View style={[{ flex: 1, }]}>
         <View style={[styles.viewHome, { flex: 1, padding:0, }]}>
 
-          <View style={[{ flex: 1, backgroundColor: '#412234'}]}>
-            <Text style={[styles.text, {color:'#ffffff', alignSelf:'center'}]}>Home</Text>
+          <View style={[styles.header]}>
+            <Text style={[styles.headerText]}>Home</Text>
           </View>
 
           <View style={[{ flex: 11 , justifyContent:'flex-end' }]}>

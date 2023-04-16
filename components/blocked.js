@@ -90,8 +90,8 @@ class Blocked extends Component {
             return (
                 <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
                     <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
-                        <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
-                            <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+                        <View style={[styles.header]}>
+                            <Text style={[styles.headerText]}>
                                 Blocked List
                             </Text>
                         </View>
@@ -105,8 +105,8 @@ class Blocked extends Component {
         return (
             <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
                 <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
-                    <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
-                        <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+                    <View style={[styles.header]}>
+                        <Text style={[styles.headerText]}>
                             Blocked List
                         </Text>
                     </View>

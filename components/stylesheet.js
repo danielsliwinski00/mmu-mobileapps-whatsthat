@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     contactOptions: {
-        marginTop: -5,
         height: 50,
         width: undefined,
         aspectRatio: 0.2,
@@ -71,8 +70,19 @@ const styles = StyleSheet.create({
         width: 200,
         right: 0, //-210,
         top: 140,
-        borderBottomLeftRadius:20,
-        borderTopLeftRadius:20,
+        borderBottomLeftRadius: 20,
+        borderTopLeftRadius: 20,
+    },
+    header: {
+        flex: 1,
+        backgroundColor: '#2A2F4F'
+    },
+    headerText: {
+        margin: 15,
+        fontSize: 28,
+        fontWeight: 600,
+        color: '#ffffff',
+        alignSelf: 'center'
     },
 })
 

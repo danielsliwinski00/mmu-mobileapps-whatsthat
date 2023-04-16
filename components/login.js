@@ -21,8 +21,8 @@ class SignUp extends Component {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          "email": this.state.emailTest,
-          "password": this.state.passwordTest,
+          "email": this.state.email,
+          "password": this.state.password,
         })
       })
       .then((response) => {
@@ -74,8 +74,8 @@ class SignUp extends Component {
       <View style={[{ flex: 1, }]}>
         <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
 
-          <View style={[{ flex: 1, backgroundColor: '#412234' }]}>
-            <Text style={[styles.text, { color: '#ffffff', alignSelf: 'center' }]}>
+          <View style={[styles.header]}>
+            <Text style={[styles.headerText]}>
               Log in
             </Text>
           </View>

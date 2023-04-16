@@ -9,6 +9,8 @@ import Search from './components/search.js'
 import Blocked from './components/blocked.js'
 import Chats from './components/chats.js'
 import Chat from './components/chat.js'
+import ChatInfo from './components/chatinfo.js'
+import AddMember from './components/addmember.js'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator, HeaderBackButton } from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator()
@@ -77,6 +79,22 @@ export default function App() {
           }}
         />
         <Stack.Screen name="Chat" component={Chat}
+          initialParams={""}
+          options={() => ({
+            headerTitle: "", headerTransparent: true,
+            headerTintColor: '#ffffff',
+            animationEnabled: 'true',
+          })}
+        />
+        <Stack.Screen name="ChatInfo" component={ChatInfo}
+          initialParams={""}
+          options={{
+            headerTitle: "", headerTransparent: true,
+            headerTintColor: '#ffffff',
+            animationEnabled: 'true',
+          }}
+        />
+        <Stack.Screen name="AddMember" component={AddMember}
           initialParams={""}
           options={{
             headerTitle: "", headerTransparent: true,
