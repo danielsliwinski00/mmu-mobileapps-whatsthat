@@ -3,34 +3,26 @@ import { Text, View, Button, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-web';
 import styles from './stylesheet.js';
 
-class HomeScreen extends Component {
+export default class HomeScreen extends Component {
   render() {
     return (
-      <View style={[{ flex: 1, }]}>
-        <View style={[styles.viewHome, { flex: 1, padding:0, }]}>
-
+      <View style={[styles.background]}>
+        <View style={[styles.view]}>
           <View style={[styles.header]}>
             <Text style={[styles.headerText]}>Home</Text>
           </View>
-
-          <View style={[{ flex: 11 , justifyContent:'flex-end' }]}>
+          <View style={[{ flex: 10, justifyContent: 'flex-end' }]}>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.props.navigation.navigate('Log in')}>
               <Text style={[styles.text]}>Log in</Text>
-          </TouchableOpacity >
-
-          <TouchableOpacity style={[styles.box]}
-            onPress={() => this.props.navigation.navigate('Sign up')}>
-            <Text style={[styles.text]}>Sign Up</Text>
-          </TouchableOpacity >
+            </TouchableOpacity >
+            <TouchableOpacity style={[styles.box]}
+              onPress={() => this.props.navigation.navigate('Sign up')}>
+              <Text style={[styles.text]}>Sign Up</Text>
+            </TouchableOpacity >
           </View>
-
         </View>
       </View>
     );
   }
 }
-
-export default HomeScreen;
-/*        <View style={{ flex: 1, backgroundColor: '#000000' }}>
-        </View> */

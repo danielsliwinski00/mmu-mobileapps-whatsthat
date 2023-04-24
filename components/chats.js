@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
-class Chats extends Component {
+export default class Chats extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -19,7 +19,7 @@ class Chats extends Component {
     }
 
     async fetchChats() {
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -46,7 +46,7 @@ class Chats extends Component {
     }
 
     async fetchChatsUpdate() {
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -91,7 +91,7 @@ class Chats extends Component {
     }
 
     async createChatRequest() {
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -245,22 +245,22 @@ class Chats extends Component {
     render() {
         if (this.state.isLoading == true) {
             return (
-                <View style={[{ flex: 1, backgroundColor: '#FDE2F340' }]}>
-                    <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                <View style={[styles.background]}>
+                    <View style={[styles.view]}>
                         <View style={[styles.header]}>
-                            <Text style={[styles.headerText, { color: '#ffffff', alignSelf: 'center' }]}>
+                            <Text style={[styles.headerText,]}>
                                 Chats
                             </Text>
                         </View>
-                        <View style={[styles.view, { flex: 10, }]}>
-                            <ActivityIndicator style={{ marginTop: 350, alignSelf: 'center' }} />
+                        <View style={[styles.activityIndicatorView]}>
+                            <ActivityIndicator style={[styles.activityIndicator]} />
                         </View>
                     </View>
                 </View>
             );
         }
         return (
-            <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
+            <View style={[styles.background]}>
 
                 <Modal
                     animationType="none"
@@ -270,15 +270,12 @@ class Chats extends Component {
                         this.setState({ creatingChat: false });
                     }}>
                     <TouchableOpacity
-                        style={{ width: '100%', flex: 1, backgroundColor: '#00000080', alignSelf: 'center' }}
+                        style={[styles.modalBackground,]}
                         activeOpacity={1}>
-                        <View style={[styles.optionsPanelContacts, { height: 200, width: '80%', top: 200, right: '10%', borderRadius: 15, margin: 10, }]}>
+                        <View style={[styles.chatsNewChatModal,]}>
                             <TextInput
                                 autoCapitalize='words'
-                                style={[styles.text, {
-                                    fontSize: 22, color: '#000000', alignSelf: 'center', placeholderTextColor: 'grey',
-                                    borderRadius: 10, width: '85%', height: 60, backgroundColor: '#d1d9e0', paddingLeft: 10,
-                                }]}
+                                style={[styles.chatsNewChatTextInput]}
                                 value={this.state.createChatName}
                                 placeholder='Chat Name'
                                 onChangeText={this.createChatNameChange}>
@@ -286,22 +283,14 @@ class Chats extends Component {
                             <TouchableOpacity
                                 style={{ alignSelf: 'center' }}
                                 onPress={() => { this.setState({ isLoading: true }), this.createChat() }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', width: 140, height: 40
-                                }]}>
+                                <Text style={[styles.chatsNewChatButtonText]}>
                                     Create Chat
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={{ marginTop: -20, alignSelf: 'center' }}
                                 onPress={() => { this.setState({ creatingChat: false }); }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', width: 140, height: 40
-                                }]}>
+                                <Text style={[styles.chatsNewChatButtonText]}>
                                     Cancel
                                 </Text>
                             </TouchableOpacity>
@@ -309,13 +298,13 @@ class Chats extends Component {
                     </TouchableOpacity>
                 </Modal>
 
-                <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                <View style={[styles.view]}>
                     <View style={[styles.header]}>
                         <Text style={[styles.headerText]}>
                             Chats
                         </Text>
                     </View>
-                    <View style={[{ flex: 11, justifyContent: 'flex-start' }]}>
+                    <View style={[{ flex: 10, justifyContent: 'flex-start' }]}>
                         <FlatList
                             removeClippedSubviews={false}
                             scrollsToTop={false}
@@ -329,24 +318,24 @@ class Chats extends Component {
                                 }
                                 if (Object.keys(item.last_message).length == 0) {
                                     return (
-                                        <View style={[{ flex: 1, flexDirection: 'column', borderColor: '#000000', borderWidth: 2, margin: 2, }]}>
+                                        <View style={[styles.chatsChatView]}>
                                             <TouchableOpacity onPress={() => { clearInterval(this.timerId), this.props.navigation.navigate("Chat", { chatID: item.chat_id }) }}>
                                                 <Text
                                                     numberOfLines={1}
                                                     ellipsizeMode='tail'
-                                                    style={[styles.text, { marginTop: 10, marginLeft: 10, fontSize: 25, alignItems: 'center' }]}>
+                                                    style={[styles.chatsChatName]}>
                                                     {item.name}
                                                 </Text>
                                                 <View style={[{ flex: 1, flexDirection: 'row' }]}>
                                                     <Text
                                                         numberOfLines={1}
                                                         ellipsizeMode='tail'
-                                                        style={[styles.text, { flex: 7, marginTop: 2, marginLeft: 10, fontSize: 25, alignSelf: 'flex-start' }]}>
+                                                        style={[styles.chatsLastMessage]}>
                                                     </Text>
 
                                                 </View>
                                                 <View>
-                                                    <Text style={[styles.text, { marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-end' }]}>
+                                                    <Text style={[styles.chatsTimestamp]}>
                                                     </Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -354,27 +343,33 @@ class Chats extends Component {
                                 }
                                 else {
                                     return (
-                                        <View style={[{ flex: 1, flexDirection: 'column', borderColor: '#000000', borderWidth: 2, margin: 2, }]}>
+                                        <View style={[styles.chatsChatView]}>
                                             <TouchableOpacity onPress={() => { this.props.navigation.navigate("Chat", { chatID: item.chat_id }) }}>
-                                                <Text
-                                                    numberOfLines={1}
-                                                    ellipsizeMode='tail'
-                                                    style={[styles.text, { marginTop: 10, marginLeft: 10, fontSize: 25, alignItems: 'center', fontWeight: 600 }]}>
-                                                    {item.name}
-                                                </Text>
-                                                <View style={[{ flex: 1, flexDirection: 'row' }]}>
-                                                    <Text
-                                                        numberOfLines={1}
-                                                        ellipsizeMode='tail'
-                                                        style={[styles.text, { flex: 7, marginTop: 2, marginLeft: 10, fontSize: 22, alignSelf: 'flex-start', fontWeight: 500 }]}>
-                                                        {item.last_message.author.first_name}: {item.last_message.message}
-                                                    </Text>
-
-                                                </View>
-                                                <View>
-                                                    <Text style={[styles.text, { marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-end' }]}>
-                                                        {this.timestampToString(item.last_message.timestamp)}
-                                                    </Text>
+                                                <View style={[{ flex: 1, }]}>
+                                                    <View style={[{ flex: 2, }]}>
+                                                        <Text
+                                                            numberOfLines={1}
+                                                            ellipsizeMode='tail'
+                                                            style={[styles.chatsChatName]}>
+                                                            {item.name}
+                                                        </Text>
+                                                    </View>
+                                                    <View style={[{ flex: 2, flexDirection: 'row' }]}>
+                                                        <View style={[{ flex: 9, }]}>
+                                                            <Text
+                                                                numberOfLines={1}
+                                                                ellipsizeMode='tail'
+                                                                style={[styles.chatsLastMessage]}>
+                                                                {item.last_message.author.first_name}: {item.last_message.message}
+                                                            </Text>
+                                                        </View>
+                                                        <View style={[{ flex: 1, }]}></View>
+                                                    </View>
+                                                    <View style={[{ flex: 1, }]}>
+                                                        <Text style={[styles.chatsTimestamp]}>
+                                                            {this.timestampToString(item.last_message.timestamp)}
+                                                        </Text>
+                                                    </View>
                                                 </View>
                                             </TouchableOpacity>
                                         </View>)
@@ -383,16 +378,15 @@ class Chats extends Component {
                         />
                     </View>
                 </View>
-                <View style={[{ position: 'absolute', bottom: 20, right: 20, borderRadius: 10, borderWidth: 3, borderColor: '#000000', height: 60, width: 120, backgroundColor: '#e7e8e9' }]}>
-                    <TouchableOpacity style={[{ flex: 1, }]} onPress={() => { this.setState({ creatingChat: true, }) }}>
-                        <Text style={[styles.text, { fontSize: 18 }]}>
+                <View style={[styles.newChatButton]}>
+                    <TouchableOpacity
+                        style={[{ flex: 1, }]}
+                        onPress={() => { this.setState({ creatingChat: true, }) }}>
+                        <Text style={[styles.newChatButtonText,]}>
                             New Chat
                         </Text>
                     </TouchableOpacity>
                 </View>
             </View >)
-
     }
 }
-
-export default Chats;

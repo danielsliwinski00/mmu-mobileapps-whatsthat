@@ -20,8 +20,9 @@ export default class AddMember extends Component {
             optionPanel: false,
             animateOptionsPanel: new Animated.Value(210),
             modalVisible: false,
-            chatid:'',
-            members:[],
+            chatid: '',
+            members: [],
+            adduserid: 0,
         }
     }
 
@@ -34,7 +35,7 @@ export default class AddMember extends Component {
 
 
     async search() {
-        return fetch("http://192.168.1.209:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
+        return fetch("http://192.168.1.102:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -55,7 +56,7 @@ export default class AddMember extends Component {
 
     async fetchContacts() {
         console.log(this.props.route.params.chatMembers)
-        return fetch("http://192.168.1.209:3333/api/1.0.0/contacts",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/contacts",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -86,7 +87,7 @@ export default class AddMember extends Component {
             isLoading: true,
         })
         console.log(this.state.chatid, id)
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id.toString(),
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id.toString(),
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -98,13 +99,13 @@ export default class AddMember extends Component {
                     this.setState({
                         isLoading: false,
                     })
-                    this.props.navigation.navigate('ChatInfo', {chatID: this.state.chatid})
+                    this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
                 }
                 else if (response.status == 400) {
                     this.setState({
                         isLoading: false,
                     })
-                    this.props.navigation.navigate('ChatInfo', {chatID: this.state.chatid})
+                    this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
                     throw "Bad Request"
                 }
                 else if (response.status == 401) {
@@ -123,6 +124,17 @@ export default class AddMember extends Component {
             .catch((error) => {
                 console.log(error);
             });
+    }
+
+    isUserMember = (id) => {
+        var arr = this.state.members
+
+        if (arr.findIndex(data => data.user_id == id)) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 
     async componentDidMount() {
@@ -149,25 +161,23 @@ export default class AddMember extends Component {
     render() {
         if (this.state.isLoading == true) {
             return (
-                <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
-                    <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                <View style={[styles.background]}>
+                    <View style={[styles.view,]}>
                         <View style={[styles.header]}>
                             <Text style={[styles.headerText]}>
                                 Contacts
                             </Text>
                         </View>
-                        <View style={[{ flex: 1, marginTop: 10, marginHorizontal: 10, backgroundColor: 'transparent', flexDirection: 'row' }]}>
-                            <TextInput style={[styles.contactSearch, { alignSelf: 'flex-start', width: 340, }]}
+                        <View style={[styles.addMemberSearchView,]}>
+                            <TextInput
+                                style={[styles.contactSearch, { alignSelf: 'center', marginLeft: '5%', width: '90%', }]}
                                 placeholder='Search'
                                 onChangeText={this.searchTextChange}
                                 onSubmitEditing={() => this.searchPrep()}>
                             </TextInput>
-                            <TouchableOpacity style={[styles.contactOptions]} onPress={() => {  }}>
-                                <Image style={[styles.contactOptions]} source={require('./images/optionsg.png')} />
-                            </TouchableOpacity>
                         </View>
-                        <View style={[styles.view, { flex: 11, }]}>
-                            <ActivityIndicator style={{ marginTop: 350, alignSelf: 'center' }} />
+                        <View style={[styles.activityIndicatorView]}>
+                            <ActivityIndicator style={[styles.activityIndicator]} />
                         </View>
                     </View>
                 </View>
@@ -175,8 +185,8 @@ export default class AddMember extends Component {
         }
         if (this.state.addingContact == true) {
             return (
-                <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
-                    <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                <View style={[styles.background]}>
+                    <View style={[styles.view]}>
                         <View style={[styles.header]}>
                             <Text style={[styles.headerText]}>
                                 Contacts
@@ -187,35 +197,33 @@ export default class AddMember extends Component {
                                 data={this.state.searchData}
                                 keyExtractor={item => item.user_id}
                                 renderItem={({ item }) => {
-                                    if (item.user_id != this.state.userID) {
+                                    if (item.user_id == this.state.userID) {
+                                        return
+                                    } else if (!this.isUserMember(item.user_id)) {
+                                        return
+                                    } else {
                                         return (
-                                            <View style={[{ flex: 1, flexDirection: 'row', borderColor: '#000000', borderWidth: 2, margin: 2, }]}>
-                                                <View style={[{ flex: 8, alignSelf: 'flex-start' }]}>
-                                                    <Text style={[styles.text, { marginTop: 10, marginLeft: 10, fontSize: 20 }]}> {item.given_name} {item.family_name} </Text>
-                                                    <Text style={[styles.text, { marginTop: 2, marginLeft: 10, fontSize: 20 }]}> {item.email} </Text>
-                                                    <Text style={[styles.text, { marginTop: 2, marginLeft: 10, fontSize: 15 }]}> User ID: {item.user_id} </Text>
+                                            <View style={[styles.contactBox,]}>
+                                                <View style={[styles.contactInfoBox]}>
+                                                    <Text style={[styles.contactInfoName,]}>{item.given_name} {item.family_name}</Text>
+                                                    <Text style={[styles.contactInfoEmail,]}>{item.email}</Text>
+                                                    <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
                                                 </View>
                                                 <View style={[{ flex: 2, alignSelf: 'center' }]}>
-                                                    <TouchableOpacity onPress={() => { this.addMember(item.user_id) }}>
-                                                        <Image style={[styles.addContact]} source={require('./images/addcontact.png')} /></TouchableOpacity></View>
+                                                    <TouchableOpacity onPress={() => { this.addMember(item.user_id.toString()) }}>
+                                                        <Image style={[styles.addContact]} source={require('./images/addcontact.png')} />
+                                                    </TouchableOpacity>
+                                                </View>
                                             </View>)
-                                    } else {
-                                        return
                                     }
-                                }
-                                }
+                                }}
                             />
                         </View>
                         <View style={[{ flex: 1, justifyContent: 'flex-end' }]}>
                             <TouchableOpacity
                                 style={styles.box}
-                                onPress={() => {
-                                    this.setState({
-                                        addingContact: false,
-                                        optionPanel: false,
-                                    })
-                                }}>
-
+                                onPress={() => { this.setState({ addingContact: false, optionPanel: false, }) }}
+                            >
                                 <Text style={styles.text}>Back
                                 </Text>
                             </TouchableOpacity>
@@ -224,22 +232,21 @@ export default class AddMember extends Component {
                 </View >)
         }
         return (
-            <ScrollView scrollEnabled={false} style={[{ flex: 1, marignBottom: 0, backgroundColor: '#f2f2f2' }]} contentContainerStyle={{ flexGrow: 1 }}>
-
-                <View style={[styles.viewHome, { width: '100%', flex: 1, padding: 0, }]}>
+            <View style={[styles.background,]}>
+                <View style={[styles.view,]}>
                     <View style={[styles.header]}>
                         <Text style={[styles.headerText]}>
                             Contacts
                         </Text>
                     </View>
-                    <View style={[{ flex: 1, marginTop: 10, marginHorizontal: 10, backgroundColor: 'transparent', flexDirection: 'row' }]}>
-                        <TextInput style={[styles.contactSearch, { alignSelf: 'flex-start', width: 340, }]}
+                    <View style={[styles.addMemberSearchView]}>
+                        <TextInput style={[styles.contactSearch, { alignSelf: 'center', marginLeft: '5%', width: '90%', }]}
                             placeholder='Search Contacts'
                             onChangeText={this.searchTextChange}
                             onSubmitEditing={() => this.searchPrep()}>
                         </TextInput>
                     </View>
-                    <View style={[{ flex: 10, justifyContent: 'flex-start' }]}>
+                    <View style={[{ flex: 9, justifyContent: 'flex-start' }]}>
                         <FlatList
                             nestedScrollEnabled
                             data={this.state.contactsData}
@@ -247,15 +254,15 @@ export default class AddMember extends Component {
                             renderItem={({ item }) => {
                                 if (item.user_id == this.state.userID) {
                                     return
-                                } else if(item.user_id==100){
+                                } else if (!this.isUserMember(item.user_id)) {
                                     return
-                                }else{
+                                } else {
                                     return (
-                                        <View style={[{ flex: 1, flexDirection: 'row', borderColor: '#000000', borderWidth: 2, margin: 2, }]}>
-                                            <View style={[{ flex: 8, marginLeft: 10, alignSelf: 'flex-start' }]}>
-                                                <Text style={[styles.text, { marginTop: 10, fontSize: 25 }]}>{item.first_name} {item.last_name}</Text>
-                                                <Text style={[styles.text, { marginTop: 2, fontSize: 18 }]}>{item.email}</Text>
-                                                <Text style={[styles.text, { marginTop: 2, fontSize: 15 }]}>User ID: {item.user_id} </Text>
+                                        <View style={[styles.contactBox,]}>
+                                            <View style={[styles.contactInfoBox]}>
+                                                <Text style={[styles.contactInfoName,]}>{item.first_name} {item.last_name}</Text>
+                                                <Text style={[styles.contactInfoEmail,]}>{item.email}</Text>
+                                                <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
                                             </View>
                                             <View style={[{ flex: 2, alignSelf: 'center' }]}>
                                                 <TouchableOpacity onPress={() => { this.addMember(item.user_id.toString()) }}>
@@ -268,7 +275,7 @@ export default class AddMember extends Component {
                         />
                     </View>
                 </View>
-            </ScrollView >
+            </View >
         );
     }
 }

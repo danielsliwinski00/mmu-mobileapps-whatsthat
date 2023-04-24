@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
-class SignUp extends Component {
+export default class SignUp extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,13 +16,13 @@ class SignUp extends Component {
   }
 
   login() {
-    return fetch("http://192.168.1.209:3333/api/1.0.0/login",
+    return fetch("http://192.168.1.102:3333/api/1.0.0/login",
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          "email": this.state.email,
-          "password": this.state.password,
+          "email": this.state.emailTest,
+          "password": this.state.passwordTest,
         })
       })
       .then((response) => {
@@ -71,9 +71,8 @@ class SignUp extends Component {
 
   render() {
     return (
-      <View style={[{ flex: 1, }]}>
-        <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
-
+      <View style={[styles.background]}>
+        <View style={[styles.view]}>
           <View style={[styles.header]}>
             <Text style={[styles.headerText]}>
               Log in
@@ -81,14 +80,14 @@ class SignUp extends Component {
           </View>
           <View style={[{ flex: 7, justifyContent: 'flex-start' }]}>
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               autoCapitalize={'none'}
               placeholder='Email'
               value={this.state.email}
               onChangeText={this.emailChange}
             />
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               autoCapitalize={'none'}
               secureTextEntry={true}
               placeholder='Password'
@@ -96,8 +95,7 @@ class SignUp extends Component {
               onChangeText={this.passwordChange}
             />
           </View>
-
-          <View style={[{ flex: 4, justifyContent: 'flex-end' }]}>
+          <View style={[{ flex: 3, justifyContent: 'flex-end' }]}>
             <TouchableOpacity
               style={styles.box}
               title='Log In'
@@ -117,7 +115,4 @@ class SignUp extends Component {
       </View>
     )
   }
-
 }
-
-export default SignUp;

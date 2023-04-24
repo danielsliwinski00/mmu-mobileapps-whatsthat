@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
-class Blocked extends Component {
+export default class Blocked extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -20,7 +20,7 @@ class Blocked extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/user/" + id + "/block",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + id + "/block",
             {
                 method: 'delete',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -31,7 +31,7 @@ class Blocked extends Component {
                     this.setState({
                         isLoading: false,
                     })
-                    this.props.navigation.navigate('Contacts')
+                    this.props.navigation.pop()
                 }
                 else if (response.status == 400) {
                     throw "You can't block yourself"
@@ -52,7 +52,7 @@ class Blocked extends Component {
     }
 
     async fetchAccounts() {
-        return fetch("http://192.168.1.209:3333/api/1.0.0/blocked",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/blocked",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -88,29 +88,29 @@ class Blocked extends Component {
     render() {
         if (this.state.isLoading == true) {
             return (
-                <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
-                    <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+                <View style={[styles.background]}>
+                    <View style={[styles.view]}>
                         <View style={[styles.header]}>
                             <Text style={[styles.headerText]}>
                                 Blocked List
                             </Text>
                         </View>
                         <View style={[styles.view, { flex: 10, }]}>
-                            <ActivityIndicator style={{ marginTop: 350, alignSelf: 'center' }} />
+                            <ActivityIndicator style={[styles.activityIndicator]} />
                         </View>
                     </View>
                 </View>
             );
         }
         return (
-            <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
+            <View style={[styles.background]}>
                 <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
                     <View style={[styles.header]}>
                         <Text style={[styles.headerText]}>
                             Blocked List
                         </Text>
                     </View>
-                    <View style={[{ flex: 11, justifyContent: 'flex-start' }]}>
+                    <View style={[{ flex: 10, justifyContent: 'flex-start' }]}>
                         <FlatList
                             data={this.state.contactsData}
                             keyExtractor={item => item.user_id}
@@ -135,12 +135,7 @@ class Blocked extends Component {
                             }}
                         />
                     </View>
-                    <View style={[{ flex: 1, justifyContent: 'flex-end' }]}>
-                    </View>
                 </View>
             </View >)
-
     }
 }
-
-export default Blocked;

@@ -5,7 +5,7 @@ import styles from './stylesheet.js';
 import validation from './validation.js';
 
 
-class SignUp extends Component {
+export default class SignUp extends Component {
 
   constructor(props) {
     super(props);
@@ -19,7 +19,7 @@ class SignUp extends Component {
   }
 
   addUser() {
-    return fetch("http://192.168.1.209:3333/api/1.0.0/user",
+    return fetch("http://192.168.1.102:3333/api/1.0.0/user",
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,8 +82,8 @@ class SignUp extends Component {
 
   render() {
     return (
-      <View style={[{ flex: 1, backgroundColor: '#f2f2f2' }]}>
-        <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
+      <View style={[styles.background]}>
+        <View style={[styles.view]}>
           <View style={[styles.header]}>
             <Text style={[styles.headerText]}>
               Sign Up
@@ -91,28 +91,28 @@ class SignUp extends Component {
           </View>
           <View style={[{ flex: 7, justifyContent: 'flex-start' }]}>
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               autoCapitalize={'words'}
               placeholder='First Name'
               value={this.state.firstName}
               onChangeText={this.firstNameChange}
             />
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               autoCapitalize={'words'}
               placeholder='Last Name'
               value={this.state.lastName}
               onChangeText={this.lastNameChange}
             />
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               autoCapitalize={'none'}
               placeholder='Email'
               value={this.state.email}
               onChangeText={this.emailChange}
             />
             <TextInput
-              style={[styles.text, { placeholderTextColor: 'grey' }]}
+              style={[styles.signupTextInput]}
               secureTextEntry={true}
               autoCapitalize={'none'}
               placeholder='Password'
@@ -120,7 +120,7 @@ class SignUp extends Component {
               onChangeText={this.passwordChange}
             />
           </View>
-          <View style={[{ flex: 4, justifyContent: 'flex-end' }]}>
+          <View style={[{ flex: 3, justifyContent: 'flex-end' }]}>
             <TouchableOpacity
               style={styles.box}
               title='Sign Up'
@@ -142,5 +142,3 @@ class SignUp extends Component {
     );
   }
 }
-
-export default SignUp;

@@ -1,5 +1,5 @@
 import React, { Component, useEffect } from 'react';
-import { TouchableOpacity, Animated, FlatList, ActivityIndicator, Text, TextInput, View, Button, Alert, Image, Modal } from 'react-native';
+import { TouchableOpacity, Animated, FlatList, ActivityIndicator, Text, TextInput, View, Button, Alert, Image, Modal, TouchableHighlight } from 'react-native';
 import { ScrollView, TouchableWithoutFeedback } from 'react-native-web';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
@@ -33,8 +33,17 @@ export default class Chat extends Component {
             editMessageModal: false,
             refresh: false,
             newMessagesData: [],
-            oldChatName:'',
-            newChatName:'',
+            oldChatName: '',
+            newChatName: '',
+            draftMessageModal: false,
+            draftMessageModalDetails: false,
+            loadDraftMessageModal: false,
+            draftMessageText: '',
+            draftMessages: [],
+            draftMessageID: 0,
+            viewDraftMessagesModal: false,
+            editDraftMessageModal: false,
+            counter: 0,
         }
     }
 
@@ -44,7 +53,7 @@ export default class Chat extends Component {
             messagesData: [],
             viewableMessagesData: [],
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -79,7 +88,7 @@ export default class Chat extends Component {
         this.setState({
             newMessagesData: [],
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -98,7 +107,7 @@ export default class Chat extends Component {
                 await this.setState({
                     newChatName: responseJson.name,
                     newMessagesData: responseJson.messages,
-                }, () => {this.updateChatName(), this.addNewMessages() }
+                }, () => { this.updateChatName(), this.addNewMessages() }
                 )
             })
             .catch((error) => {
@@ -110,7 +119,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid + "/message",
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -146,7 +155,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
             {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -189,7 +198,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.209:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
+        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
             {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -222,9 +231,124 @@ export default class Chat extends Component {
             });
     }
 
+    async saveDraftMessage() {
+        if (this.state.draftMessages == 'undefined') {
+            let id = 0
+            var obj = {}
+            obj.draftID = id
+            obj.message = this.state.sendMessageText
+
+            var arr = new Array()
+            arr[0] = obj
+            this.setState({
+                draftMessages: arr
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (this.state.draftMessages.length <= 0) {
+            let id = 0
+            var obj = {}
+            obj.draftID = id
+            obj.message = this.state.sendMessageText
+
+            var arr = new Array()
+            arr[0] = obj
+            this.setState({
+                draftMessages: arr
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else {
+            console.log("not here")
+            let index = this.state.draftMessages.length - 1;
+            let id = this.state.draftMessages[index].draftID;
+            id += 1;
+
+            var obj = {}
+            obj.draftID = id
+            obj.message = this.state.sendMessageText
+            var arr = this.state.draftMessages
+            arr.push(obj)
+
+            console.log(this.state.draftMessages)
+
+            console.log(arr)
+
+            this.setState({
+                draftMessages: arr,
+                counter: this.state.counter += 1
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+    }
+
+    loadDraftMessage() {
+        var drafts = this.state.draftMessages
+
+        if (drafts.findIndex(data => data.draftID == this.state.draftMessageID) == 0) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            this.setState({
+                sendMessageText: drafts[index].message,
+            })
+        }
+        else if (drafts.findIndex(data => data.draftID == this.state.draftMessageID)) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            this.setState({
+                sendMessageText: drafts[index].message,
+            })
+        }
+    }
+
+    deleteDraftMessage() {
+        var drafts = this.state.draftMessages
+        if (drafts.findIndex(data => data.draftID == this.state.draftMessageID) == 0) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts.splice(index, 1)
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == this.state.draftMessageID)) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts.splice(index, 1)
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+    }
+
+    editDraftMessage() {
+        var drafts = this.state.draftMessages
+        if (drafts.findIndex(data => data.draftID == this.state.draftMessageID) == 0) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts[index].message = this.state.draftMessageText
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+                editDraftMessageModal: false,
+                viewDraftMessagesModal: true
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == this.state.draftMessageID)) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts[index].message = this.state.draftMessageText
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+                editDraftMessageModal: false,
+                viewDraftMessagesModal: true
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+    }
+
     changeMessageText = (text) => {
         this.setState({
             sendMessageText: text
+        })
+    }
+
+    draftMessageTextChange = (text) => {
+        this.setState({
+            draftMessageText: text
         })
     }
 
@@ -234,9 +358,9 @@ export default class Chat extends Component {
         })
     }
 
-    updateChatName(){
-        if(this.state.oldChatName !== this.state.newChatName){
-            this.setState({oldChatName: this.state.newChatName})
+    updateChatName() {
+        if (this.state.oldChatName !== this.state.newChatName) {
+            this.setState({ oldChatName: this.state.newChatName })
         }
     }
 
@@ -246,11 +370,11 @@ export default class Chat extends Component {
 
 
         if (oldMessages.length !== newMessages.length) {
-            if(oldMessages.length > newMessages.length){
+            if (oldMessages.length > newMessages.length) {
                 this.setState({
                     messagesData: this.state.newMessagesData,
                     viewableMessagesData: [],
-                },()=>{ this.addMessagesData(0)})
+                }, () => { this.addMessagesData(0) })
             }
             this.setState({
                 messagesData: this.state.newMessagesData
@@ -319,20 +443,20 @@ export default class Chat extends Component {
             if (interval / 60 % 1 == 0) { //if no minutes
                 interval = interval / 60
                 switch (true) {
-                    case interval == 1:
+                    case Math.round(interval) == 1:
                         return (Math.round(interval) + " hour ago")
-                    case interval > 1:
+                    case Math.round(interval) > 1:
                         return (Math.round(interval) + " hours ago")
                 }
             }
             else if (interval / 60 < 1) { // if only minutes
                 interval = interval % 60
                 switch (true) {
-                    case Math.round(interval) == 0.6:
+                    case Math.round(interval) == 1:
                         return (Math.round(interval) + " minute ago")
-                    case interval > 0.6:
+                    case Math.round(interval) > 1:
                         return (Math.round(interval) + " minutes ago")
-                    case interval < 0.6:
+                    case Math.round(interval) < 1:
                         return ("Just now")
                 }
             }
@@ -387,11 +511,22 @@ export default class Chat extends Component {
     }
 
     async componentDidMount() {
-        await this.setState({
-            isLoading: true,
-            chatid: this.props.route.params.chatID.toString(),
-            userID: await AsyncStorage.getItem("whatsthatID"),
-        })
+        if (await AsyncStorage.getItem("draftMessages") == 'undefined') {
+            await this.setState({
+                isLoading: true,
+                chatid: this.props.route.params.chatID.toString(),
+                userID: await AsyncStorage.getItem("whatsthatID"),
+                draftMessages: await AsyncStorage.getItem("draftMessages"),
+            })
+        }
+        else {
+            await this.setState({
+                isLoading: true,
+                chatid: this.props.route.params.chatID.toString(),
+                userID: await AsyncStorage.getItem("whatsthatID"),
+                draftMessages: JSON.parse(await AsyncStorage.getItem("draftMessages")),
+            })
+        }
 
         this.fetchChatData()
         this.timerId = setInterval(() => { this.fetchChatDataUpdate() }, 2000)
@@ -412,11 +547,11 @@ export default class Chat extends Component {
     render() {
         if (this.state.isLoading == true) {
             return (
-                <View style={[{ flex: 1, backgroundColor: '#FDE2F340' }]}>
-                    <View style={[styles.viewHome, { flex: 1, padding: 0, }]}>
-                        <View style={[styles.header, { flex: 2}]}>
-                            <View style={[{ flex: 1, marginLeft: 55, marginRight: 15, flexDirection: 'row' }]}>
-                                <Text style={[styles.headerText, { flex: 8, color: '#ffffff', alignSelf: 'flex-start' }]}
+                <View style={[styles.background]}>
+                    <View style={[styles.view]}>
+                        <View style={[styles.header, { flex: 2 }]}>
+                            <View style={[styles.chatChatNameView]}>
+                                <Text style={[styles.chatChatName]}
                                     numberOfLines={1}
                                     ellipsizeMode='tail'>
                                     {this.state.oldChatName}
@@ -424,35 +559,31 @@ export default class Chat extends Component {
                             </View>
                         </View>
                         <View style={[styles.view, { flex: 7, }]}>
-                            <ActivityIndicator style={{ marginTop: '50%', alignSelf: 'center' }} />
+                            <ActivityIndicator style={[styles.activityIndicator]} />
                         </View>
-                        <View style={[{ flex: 1, justifyContent: 'flex-end', flexDirection: 'row', backgroundColor: '#2A2F4F', marginTop: 2 }]}>
+                        <View style={[styles.sendMessageView,]}>
+                        <TouchableOpacity onLongPress={() => { this.setState({ draftMessageModal: true }) }}>
                             <TextInput
-                                multiline={true}
-                                numberOfLines={1}
+                                onSubmitEditing={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}
                                 value={this.state.sendMessageText}
-                                style={[styles.text, {
-                                    flex: 8, placeholderTextColor: 'grey', width: 240, height: '60%', fontSize: 22, bottom: '20%', paddingTop: 2,
-                                    borderRadius: 15, borderColor: '#000000', borderWidth: 2, paddingLeft: 10, backgroundColor: '#ffffff'
-                                }]}
+                                style={[styles.sendMessageTextInput,]}
                                 placeholder='Aa'
-                                onChangeText={this.changeMessageText}></TextInput>
-                            <TouchableOpacity style={[{
-                                flex: 3, width: 20, height: '60%', marginTop: 5, marginRight: 10, bottom: '0%',
-                                borderRadius: 15, borderColor: '#000000', borderWidth: 2, marginTop: 15
-                            }]}
-                                onPress={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}>
-                                <Text style={[styles.text, { fontSize: 22, color: '#ffffff', marginTop: 5, alignSelf: 'center' }]}>
-                                    Send
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                onChangeText={this.changeMessageText}>
+                            </TextInput>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.sendMessageButton,]}
+                            onPress={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}>
+                            <Text style={[styles.sendMessageButtonText,]}>
+                                Send
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                     </View>
                 </View>
             );
         }
         return (
-            <View scrollEnabled={false} style={[{ flex: 1, width: '100%', margin: 0, backgroundColor: '#f2f2f2' }]}>
+            <View style={[styles.background]}>
 
                 <Modal
                     animationType="none"
@@ -462,32 +593,206 @@ export default class Chat extends Component {
                         this.setState({ modalVisible: false });
                     }}>
                     <TouchableOpacity
-                        style={{ width: '100%', flex: 1, backgroundColor: '#00000080', alignSelf: 'center' }}
-                        activeOpacity={1}>
-                        <View style={[styles.optionsPanelContacts, { height: 140, width: '80%', top: 200, right: '10%', borderRadius: 15, margin: 10, }]}>
-                            <TouchableOpacity
-                                style={{ alignSelf: 'center', width: '80%', marginTop: 5 }}
-                                onPress={() => { this.setState({ modalVisible: false }), clearInterval(this.timerId), this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid }) }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                }]}>
-                                    View Chat Info
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{ marginTop: -10, alignSelf: 'center' }}
-                                onPress={() => { this.setState({ modalVisible: false }); }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', width: '80%', height: 40
-                                }]}>
-                                    Cancel
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ modalVisible: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight2Button]}>
+                            <View style={[styles.modalViewButtons]}>
+                                <TouchableOpacity
+                                    style={[styles.modal2Button]}
+                                    onPress={() => {
+                                        this.setState({ modalVisible: false }),
+                                            clearInterval(this.timerId),
+                                            this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
+                                    }}
+                                >
+                                    <Text style={[styles.modalButtonText]}>
+                                        View Chat Info
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal2ButtonCancel]}
+                                    onPress={() => { this.setState({ modalVisible: false }); }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.editDraftMessageModal}
+                    onRequestClose={() => {
+                        this.setState({ editDraftMessageModal: false });
+                    }}>
+                    <TouchableOpacity
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ editDraftMessageModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight3Button]}>
+                            <View style={[styles.modalViewButtons]}>
+                                <TextInput
+                                    style={[styles.modalTextInput]}
+                                    value={this.state.draftMessageText}
+                                    placeholder=''
+                                    onChangeText={this.draftMessageTextChange}>
+                                </TextInput>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button]}
+                                    onPress={() => { this.editDraftMessage() }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Confirm Edit
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3ButtonCancel]}
+                                    onPress={() => { this.setState({ editDraftMessageModal: false, draftMessageModalDetails: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.draftMessageModalDetails}
+                    onRequestClose={() => {
+                        this.setState({ draftMessageModalDetails: false });
+                    }}>
+                    <TouchableOpacity
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ draftMessageModalDetails: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight4Button]}>
+                            <View style={[styles.modalViewButtons,]}>
+                                <TouchableOpacity
+                                    style={[styles.modal4Button]}
+                                    onPress={() => { this.setState({ editDraftMessageModal: true, draftMessageModalDetails: false }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Edit draft message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal4Button]}
+                                    onPress={() => { this.loadDraftMessage(), this.setState({ draftMessageModalDetails: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Load draft message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal4Button]}
+                                    onPress={() => { this.deleteDraftMessage(), this.setState({ draftMessageModalDetails: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Delete draft message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal4ButtonCancel, {}]}
+                                    onPress={() => { this.setState({ draftMessageModalDetails: false, viewDraftMessagesModal: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.viewDraftMessagesModal}
+                    onRequestClose={() => {
+                        this.setState({ viewDraftMessagesModal: false });
+                    }}>
+                    <TouchableOpacity
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ viewDraftMessagesModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight4Button]}>
+                            <View style={[styles.modalViewButtons,]}>
+                                <FlatList
+                                    style={[{ backgroundColor: '#00000020' }]}
+                                    extraData={this.state.counter}
+                                    bounces={false}
+                                    data={this.state.draftMessages}
+                                    scrollsToTop={false}
+                                    keyExtractor={item => item.draftID}
+                                    renderItem={({ item }) => {
+                                        return (
+                                            <TouchableOpacity onPress={() => {
+                                                this.setState({
+                                                    draftMessageModalDetails: true,
+                                                    viewDraftMessagesModal: false,
+                                                    draftMessageID: item.draftID,
+                                                    draftMessageText: item.message
+                                                })
+                                            }} style={[styles.box, { borderWidth: 2, backgroundColor: '#ffffff' }]}>
+                                                <Text style={[styles.text, { marginTop: 10, fontSize: 25 }]}>{item.message}</Text>
+                                            </TouchableOpacity>)
+                                    }}
+                                />
+                                <TouchableOpacity
+                                    style={[styles.modal4ButtonCancel, { marginBottom: '1%' }]}
+                                    onPress={() => { this.setState({ viewDraftMessagesModal: false, draftMessageModal: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.draftMessageModal}
+                    onRequestClose={() => {
+                        this.setState({ draftMessageModal: false });
+                    }}>
+                    <TouchableOpacity
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ draftMessageModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight3Button]}>
+                            <View style={[styles.modalViewButtons]}>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button]}
+                                    onPress={() => { this.saveDraftMessage(), this.setState({ draftMessageModal: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Save as draft message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button]}
+                                    onPress={() => { this.setState({ draftMessageModal: false, viewDraftMessagesModal: true }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        View draft messages
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3ButtonCancel]}
+                                    onPress={() => { this.setState({ draftMessageModal: false, }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
                     </TouchableOpacity>
                 </Modal>
 
@@ -499,41 +804,34 @@ export default class Chat extends Component {
                         this.setState({ editMessageModal: false });
                     }}>
                     <TouchableOpacity
-                        style={{ width: '100%', flex: 1, backgroundColor: '#00000080', alignSelf: 'center' }}
-                        activeOpacity={1}>
-                        <View style={[styles.optionsPanelContacts, { height: 200, width: '80%', top: 200, right: '10%', borderRadius: 15, margin: 10, }]}>
-                            <TextInput
-                                style={[styles.text, {
-                                    fontSize: 22, color: '#000000', alignSelf: 'center', placeholderTextColor: 'grey',
-                                    borderRadius: 10, width: '85%', height: 60, backgroundColor: '#d1d9e0', paddingLeft: 10,
-                                }]}
-                                value={this.state.editMessageText}
-                                placeholder=''
-                                onChangeText={this.editMessageTextChange}>
-                            </TextInput>
-                            <TouchableOpacity
-                                style={{ alignSelf: 'center', width: '80%', marginTop: 5 }}
-                                onPress={() => { this.editMessageRequest(), this.setState({ editMessageModal: false, }) }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                }]}>
-                                    Confirm Edit
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{ alignSelf: 'center', width: '80%', marginTop: 5 }}
-                                onPress={() => { this.setState({ editMessageModal: false, messageInfoModal: true }) }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                }]}>
-                                    Cancel
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ editMessageModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight3Button]}>
+                            <View style={[styles.modalViewButtons]}>
+                                <TextInput
+                                    style={[styles.modalTextInput]}
+                                    value={this.state.editMessageText}
+                                    placeholder=''
+                                    onChangeText={this.editMessageTextChange}>
+                                </TextInput>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button]}
+                                    onPress={() => { this.editMessageRequest(), this.setState({ editMessageModal: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Confirm Edit
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.modal3ButtonCancel}
+                                    onPress={() => { this.setState({ editMessageModal: false, messageInfoModal: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
                     </TouchableOpacity>
                 </Modal>
 
@@ -545,40 +843,35 @@ export default class Chat extends Component {
                         this.setState({ confirmDeleteModal: false });
                     }}>
                     <TouchableOpacity
-                        style={{ width: '100%', flex: 1, backgroundColor: '#00000080', alignSelf: 'center' }}
-                        activeOpacity={1}>
-                        <View style={[styles.optionsPanelContacts, { height: 200, width: '80%', top: 200, right: '10%', borderRadius: 15, margin: 10, }]}>
-                            <Text style={[styles.text, {
-                                fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                paddingHorizontal: 12, paddingVertical: 5, height: 40
-                            }]}>
-                                Are you sure you wish to delete this message?
-                            </Text>
-                            <View style={{ flex: 1, flexDirection: 'row' }}>
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignSelf: 'center', width: '40%', marginTop: 5, }}
-                                    onPress={() => { this.deleteMessageRequest(), this.setState({ confirmDeleteModal: false, }) }}>
-                                    <Text style={[styles.text, {
-                                        fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                        paddingHorizontal: 12, paddingVertical: 5,
-                                        borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                    }]}>
-                                        Yes
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ confirmDeleteModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight2Button]}>
+                            <View style={[styles.modalViewButtons,]}>
+                                <View style={{ flex: 1, textAlign: 'center', marginTop: '5%' }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Are you sure you wish to delete this message?
                                     </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignSelf: 'center', width: '40%', marginTop: 5 }}
-                                    onPress={() => { this.setState({ confirmDeleteModal: false, messageInfoModal: true }) }}>
-                                    <Text style={[styles.text, {
-                                        fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                        paddingHorizontal: 12, paddingVertical: 5,
-                                        borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                    }]}>
-                                        No
-                                    </Text>
-                                </TouchableOpacity>
+                                </View>
+                                <View style={{ flex: 1, flexDirection: 'row' }}>
+                                    <TouchableOpacity
+                                        style={[styles.modalYesNoButton]}
+                                        onPress={() => { this.deleteMessageRequest(), this.setState({ confirmDeleteModal: false, }) }}>
+                                        <Text style={[styles.modalButtonText]}>
+                                            Yes
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.modalYesNoButton]}
+                                        onPress={() => { this.setState({ confirmDeleteModal: false, messageInfoModal: true }) }}>
+                                        <Text style={[styles.modalButtonText]}>
+                                            No
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
+                        </TouchableHighlight>
                     </TouchableOpacity>
                 </Modal>
 
@@ -590,68 +883,56 @@ export default class Chat extends Component {
                         this.setState({ messageInfoModal: false, messageID: '', editMessageText: '', });
                     }}>
                     <TouchableOpacity
-                        style={{ width: '100%', flex: 1, backgroundColor: '#00000080', alignSelf: 'center' }}
-                        activeOpacity={1}>
-                        <View style={[styles.optionsPanelContacts, { height: 200, width: '80%', top: 200, right: '10%', borderRadius: 15, margin: 10, }]}>
-                            <TouchableOpacity
-                                style={{ alignSelf: 'center', width: '80%', marginTop: 5 }}
-                                onPress={() => { this.setState({ messageInfoModal: false, editMessageModal: true, }) }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                }]}>
-                                    Edit Message
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{ alignSelf: 'center', width: '80%', marginTop: 5 }}
-                                onPress={() => { this.setState({ messageInfoModal: false, confirmDeleteModal: true }) }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', height: 40
-                                }]}>
-                                    Delete Message
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{ marginTop: -10, alignSelf: 'center' }}
-                                onPress={() => { this.setState({ messageInfoModal: false }); }}>
-                                <Text style={[styles.text, {
-                                    fontSize: 20, color: '#2e4052', alignSelf: 'Center', alignItems: 'center',
-                                    paddingHorizontal: 12, paddingVertical: 5,
-                                    borderRadius: 5, borderWidth: 2, borderColor: '#000000', width: '80%', height: 40
-                                }]}>
-                                    Cancel
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        style={[styles.modalOpacity,]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ messageInfoModal: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight3Button]}>
+                            <View style={[styles.modalViewButtons]}>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button,]}
+                                    onPress={() => { this.setState({ messageInfoModal: false, editMessageModal: true, }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Edit Message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button,]}
+                                    onPress={() => { this.setState({ messageInfoModal: false, confirmDeleteModal: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Delete Message
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3ButtonCancel,]}
+                                    onPress={() => { this.setState({ messageInfoModal: false }); }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
                     </TouchableOpacity>
                 </Modal>
 
-                <View style={[styles.viewHome, { flex: 1, padding: 0, width: '100%' }]}>
+                <View style={[styles.view]}>
                     <View style={[styles.header, { flex: 2 }]}>
-                        <View style={[{ flex: 1, marginLeft: 55, marginRight: 15, flexDirection: 'row' }]}>
-                            <Text style={[styles.headerText, { flex: 8, color: '#ffffff', alignSelf: 'flex-start' }]}
+                        <View style={[styles.chatChatNameView,]}>
+                            <Text style={[styles.chatChatName,]}
                                 numberOfLines={1}
                                 ellipsizeMode='tail'>
                                 {this.state.oldChatName}
                             </Text>
                         </View>
                         <View style={[{ flex: 1, flexDirection: 'row' }]}>
-                            <Text style={[styles.text, { fontSize: 20, color: '#ffffff', flex: 7 }]}
+                            <Text style={[styles.chatChatCreator,]}
                                 numberOfLines={1}
                                 ellipsizeMode='tail'>
                                 Chat Creator: {this.state.chatData.creator.first_name} {this.state.chatData.creator.last_name}
                             </Text>
                             <TouchableOpacity
-                                style={[styles.contactOptions, { flex: 3, height: 50, width: 40, alignSelf: 'center' }]}
-                                onPress={() => {
-                                    this.setState({
-                                        modalVisible: true,
-                                    })
-                                }}>
+                                style={[styles.chatOptionsButton,]}
+                                onPress={() => { this.setState({ modalVisible: true, }) }}>
                                 <Image style={[styles.contactOptions, { transform: [{ rotate: '90deg' }] }]} source={require('./images/optionsg.png')} />
                             </TouchableOpacity>
                         </View>
@@ -680,16 +961,13 @@ export default class Chat extends Component {
                                             }}>
                                                 <View style={[{ flexDirection: 'row' }]}>
                                                     <View style={[{ flex: 1, }]}></View>
-                                                    <View style={[{
-                                                        flex: 11, flexDirection: 'column', borderColor: '#000000', borderTopLeftRadius: 15,
-                                                        borderBottomLeftRadius: 15, borderWidth: 2, margin: 2, backgroundColor: '#E5BEEC'
-                                                    }]}>
-                                                        <Text style={[styles.text, { marginTop: 10, marginLeft: 10, fontSize: 20, alignItems: 'center', color: '#000000' }]}>{item.message}</Text>
+                                                    <View style={[styles.userMessageView]}>
+                                                        <Text style={[styles.messageMessage,]}>{item.message}</Text>
                                                         <View style={[{ flex: 1, flexDirection: 'row' }]}>
-                                                            <Text style={[styles.text, { flex: 7, marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-start' }]}>
+                                                            <Text style={[styles.messageTimestamp,]}>
                                                                 {this.timestampToString(item.timestamp)}
                                                             </Text>
-                                                            <Text style={[styles.text, { flex: 3, marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-end' }]}>
+                                                            <Text style={[styles.messageAuthor,]}>
                                                                 {item.author.first_name}
                                                             </Text>
                                                         </View>
@@ -700,16 +978,13 @@ export default class Chat extends Component {
                                     else {
                                         return (
                                             <View style={[{ flexDirection: 'row' }]}>
-                                                <View style={[{
-                                                    flex: 11, flexDirection: 'column', borderColor: '#000000', borderTopRightRadius: 15,
-                                                    borderBottomRightRadius: 15, borderWidth: 2, margin: 2, backgroundColor: '#917FB3'
-                                                }]}>
-                                                    <Text style={[styles.text, { marginTop: 10, marginLeft: 10, fontSize: 20, alignItems: 'center' }]}>{item.message}</Text>
+                                                <View style={[styles.replyMessageView,]}>
+                                                    <Text style={[styles.messageMessage,]}>{item.message}</Text>
                                                     <View style={[{ flex: 1, flexDirection: 'row' }]}>
-                                                        <Text style={[styles.text, { flex: 7, marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-start' }]}>
+                                                        <Text style={[styles.messageTimestamp,]}>
                                                             {this.timestampToString(item.timestamp)}
                                                         </Text>
-                                                        <Text style={[styles.text, { flex: 3, marginTop: 2, marginLeft: 10, fontSize: 15, alignSelf: 'flex-end' }]}>
+                                                        <Text style={[styles.messageAuthor]}>
                                                             {item.author.first_name}
                                                         </Text>
                                                     </View>
@@ -722,29 +997,25 @@ export default class Chat extends Component {
                             />
                         </View>
                     </View>
-                    <View style={[{ flex: 1, justifyContent: 'flex-end', flexDirection: 'row', backgroundColor: '#2A2F4F', marginTop: 2 }]}>
-                        <TextInput
-                            onSubmitEditing={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}
-                            value={this.state.sendMessageText}
-                            style={[styles.text, {
-                                flex: 8, placeholderTextColor: 'grey', width: 240, height: '60%', fontSize: 22, bottom: '20%', paddingTop: 2,
-                                borderRadius: 15, borderColor: '#000000', borderWidth: 2, paddingLeft: 10, backgroundColor: '#ffffff'
-                            }]}
-                            placeholder='Aa'
-                            onChangeText={this.changeMessageText}></TextInput>
-                        <TouchableOpacity style={[{
-                            flex: 3, width: 20, height: '60%', marginTop: 5, marginRight: 10, bottom: '0%',
-                            borderRadius: 15, borderColor: '#000000', borderWidth: 2, marginTop: 15
-                        }]}
+                    <View style={[styles.sendMessageView,]}>
+                        <TouchableOpacity onLongPress={() => { this.setState({ draftMessageModal: true }) }}>
+                            <TextInput
+                                onSubmitEditing={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}
+                                value={this.state.sendMessageText}
+                                style={[styles.sendMessageTextInput,]}
+                                placeholder='Aa'
+                                onChangeText={this.changeMessageText}>
+                            </TextInput>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.sendMessageButton,]}
                             onPress={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}>
-                            <Text style={[styles.text, { fontSize: 22, color: '#ffffff', marginTop: 5, alignSelf: 'center' }]}>
+                            <Text style={[styles.sendMessageButtonText,]}>
                                 Send
                             </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </View >
         )
-
     }
 }
