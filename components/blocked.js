@@ -20,7 +20,7 @@ export default class Blocked extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + id + "/block",
+        return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/block",
             {
                 method: 'delete',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -52,7 +52,7 @@ export default class Blocked extends Component {
     }
 
     async fetchAccounts() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/blocked",
+        return fetch("http://localhost:3333/api/1.0.0/blocked",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })

@@ -19,7 +19,7 @@ export default class Chats extends Component {
     }
 
     async fetchChats() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
+        return fetch("http://localhost:3333/api/1.0.0/chat",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -46,7 +46,7 @@ export default class Chats extends Component {
     }
 
     async fetchChatsUpdate() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
+        return fetch("http://localhost:3333/api/1.0.0/chat",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -91,7 +91,7 @@ export default class Chats extends Component {
     }
 
     async createChatRequest() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat",
+        return fetch("http://localhost:3333/api/1.0.0/chat",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },

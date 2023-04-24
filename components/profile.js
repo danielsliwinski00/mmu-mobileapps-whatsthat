@@ -13,6 +13,7 @@ export default class Profile extends Component {
       isLoading: true,
       profileEdit: false,
       profileData: {},
+      profileUpdateData: [],
       firstName: "",
       lastName: "",
       email: "",
@@ -22,21 +23,36 @@ export default class Profile extends Component {
       lnameChanged: false,
       emailChanged: false,
       passwordChanged: false,
+      userPhoto: undefined,
     }
   }
 
   async userInfo() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
       {
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
       })
       .then((response) => {
-        return response.json();
+        if (response.status == 200) {
+          return response.json();
+        }
+        else if (response.status == 401) {
+          toast.show("Unauthorized", { type: 'danger' })
+        }
+        else if (response.status == 404) {
+          toast.show("Not Found", { type: 'danger' })
+        }
+        else {
+          toast.show("Server Error", { type: 'danger' })
+        }
       })
       .then((responseJson) => {
         //console.log(responseJson)
         this.setState({
           profileData: responseJson,
+          firstName: responseJson.first_name,
+          lastName: responseJson.last_name,
+          email: responseJson.email,
           isLoading: false,
         })
       })
@@ -46,23 +62,26 @@ export default class Profile extends Component {
   }
 
   async logOut() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/logout",
+    return fetch("http://localhost:3333/api/1.0.0/logout",
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
       })
       .then(async (response) => {
         if (response.status == 200) {
+          toast.show("Logged out", { type: 'success' })
           await AsyncStorage.removeItem("whatsthatID")
           await AsyncStorage.removeItem("whatsthatSessionToken")
           this.props.navigation.navigate('Home');
         }
         else if (response.status == 401) {
+          toast.show("Unauthorized", { type: 'danger' })
           await AsyncStorage.removeItem("whatsthatID")
           await AsyncStorage.removeItem("whatsthatSessionToken")
           this.props.navigation.navigate('Home');
         }
         else {
+          toast.show("Server error", { type: 'danger' })
           throw "Something went wrong"
         }
       })
@@ -71,92 +90,72 @@ export default class Profile extends Component {
       });
   }
 
+  async updateUserInfo() {
+    console.log(this.state.profileUpdateData)
+    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+        body: JSON.stringify({
+          'first_name': this.state.profileUpdateData.first_name,
+          'last_name': this.state.profileUpdateData.last_name,
+          'email': this.state.profileUpdateData.email,
+          'password': this.state.profileUpdateData.password
+        })
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          toast.show("User Updated", { type: 'success' })
+          this.userInfo();
+        }
+        if (response.status == 400) {
+          toast.show("Bad Request", { type: 'danger' })
+        }
+        if (response.status == 401) {
+          toast.show("Unauthorized", { type: 'danger' })
+        }
+        if (response.status == 403) {
+          toast.show("Forbidden", { type: 'danger' })
+        }
+        if (response.status == 404) {
+          toast.show("Not Found", { type: 'danger' })
+        }
+        else {
+          toast.show("Server Error", { type: 'danger' })
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   async updateUserRequest() {
-    if (this.state.fnameChanged == true) {
-      await this.updateUserFName();
+    var updated = this.state.profileData
+    if (this.state.firstName != this.state.profileData.first_name) {
+      updated.first_name = this.state.firstName
     }
-    if (this.state.lnameChanged == true) {
-      await this.updateUserLName();
+    if (this.state.lastName != this.state.profileData.last_name) {
+      updated.last_name = this.state.lastName
     }
-    if (this.state.emailChanged == true) {
+    if (this.state.email != this.state.profileData.email) {
       if (this.validateEmail(this.state.email, "email") == true) {
-        await this.updateUserEmail();
+        updated.email = this.state.email
       }
     }
     if (this.state.passwordChanged == true) {
       if (this.validatePassword(this.state.password, "password") == true) {
-        await this.updateUserPassword();
+        updated.password = this.state.password
       }
     }
-    this.userInfo();
     this.setState({
-      profileEdit: false,
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      fnameChanged: false,
-      lnameChanged: false,
-      emailChanged: false,
-      passwordChanged: false,
-    })
+      profileUpdateData: updated
+    }, () => { this.updateUserInfo(); })
   }
 
-  async updateUserFName() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
+  async uploadPhoto() {
+    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID") + "/photo",
       {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-        body: JSON.stringify({
-          'first_name': this.state.firstName,
-        })
-      })
-      .then((response) => {
-        console.log("successfully changed first name");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  async updateUserLName() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-        body: JSON.stringify({
-          'last_name': this.state.lastName,
-        })
-      })
-      .then((response) => {
-        console.log("successfully changed last name");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  async updateUserEmail() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-        body: JSON.stringify({
-          'email': this.state.email,
-        })
-      })
-      .then((response) => {
-        console.log("successfully changed email");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  async updateUserPassword() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
-      {
-        method: 'PATCH',
+        method: 'POST ',
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
         body: JSON.stringify({
           'password': this.state.password,
@@ -170,28 +169,30 @@ export default class Profile extends Component {
       });
   }
 
+  async getPhoto() {
+    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID") + "/photo",
+      {
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+      })
+      .then((response) => {
+        return response.JSON()
+      })
+      .then((responseJson) => {
+        this.setState({
+          userPhoto: responseJson
+        })
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   updateUser() {
-    if (this.state.firstName == '') {
-      this.setState({
-        fnameChanged: false,
-      })
-    }
-    if (this.state.lastName == '') {
-      this.setState({
-        lnameChanged: false,
-      })
-    }
-    if (this.state.email == '') {
-      this.setState({
-        emailChanged: false,
-      })
-    }
     if (this.state.password == '') {
       this.setState({
         passwordChanged: false
       })
     }
-
     this.updateUserRequest();
   }
 
@@ -200,7 +201,7 @@ export default class Profile extends Component {
       return true;
     }
     else {
-      alert("Incorect email format");
+      toast.show("Incorrect Email Format", { type: 'danger' })
     }
   }
 
@@ -209,7 +210,7 @@ export default class Profile extends Component {
       return true;
     }
     else {
-      alert("Incorect password format");
+      toast.show("Incorrect Password Format", { type: 'danger' })
     }
   }
 
@@ -229,8 +230,8 @@ export default class Profile extends Component {
     this.setState({ password: text, passwordChanged: true, })
   }
 
-  async componentDidMount() {
-    await this.userInfo();
+  componentDidMount() {
+    this.userInfo();
   }
 
   render() {
@@ -262,7 +263,7 @@ export default class Profile extends Component {
             <ScrollView style={[{ flex: 8, }]}>
               <View style={[{ flex: 1 }]}>
                 <Text style={[styles.profileText]}>
-                  First Name:{'\n'}{this.state.profileData.first_name}
+                  First Name:
                 </Text>
                 <TextInput
                   style={[styles.profileTextInput,]}
@@ -271,7 +272,7 @@ export default class Profile extends Component {
                   onChangeText={this.firstNameChange}
                 />
                 <Text style={[styles.profileText,]}>
-                  Last Name:{'\n'}{this.state.profileData.last_name}
+                  Last Name:
                 </Text>
                 <TextInput
                   style={[styles.profileTextInput,]}
@@ -280,7 +281,7 @@ export default class Profile extends Component {
                   onChangeText={this.lastNameChange}
                 />
                 <Text style={[styles.profileText,]}>
-                  Email:{'\n'}{this.state.profileData.email}
+                  Email:
                 </Text>
                 <TextInput
                   style={[styles.profileTextInput,]}
@@ -331,13 +332,13 @@ export default class Profile extends Component {
           </View>
           <View style={[{ flex: 7, justifyContent: 'flex-start' }]}>
             <Text style={[styles.profileText,]}>
-              First Name:{'\n'}{this.state.profileData.first_name}
+              First Name:{'\n'}{this.state.firstName}
             </Text>
             <Text style={[styles.profileText,]}>
-              Last Name:{'\n'}{this.state.profileData.last_name}
+              Last Name:{'\n'}{this.state.lastName}
             </Text>
             <Text style={[styles.profileText,]}>
-              Email:{'\n'}{this.state.profileData.email}
+              Email:{'\n'}{this.state.email}
             </Text>
           </View>
           <View style={[{ flex: 4, justifyContent: 'flex-end' }]}>

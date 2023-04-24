@@ -4,7 +4,6 @@ import { TouchableOpacity } from 'react-native-web';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
-
 export default class SignUp extends Component {
 
   constructor(props) {
@@ -19,7 +18,7 @@ export default class SignUp extends Component {
   }
 
   addUser() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/user",
+    return fetch("http://localhost:3333/api/1.0.0/user",
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,7 +30,17 @@ export default class SignUp extends Component {
         })
       })
       .then((response) => {
-        this.props.navigation.navigate('Log in');
+        if (response.status == 201) {
+          toast.show("User Created", { type: 'success' })
+          this.props.navigation.navigate('Log in');
+        }
+        else if (response.status == 400) {
+          toast.show("Bad Request", { type: 'danger' })
+        }
+        else {
+          toast.show("Server Error", { type: 'danger' })
+        }
+
       })
       .catch((error) => {
         console.error(error);
@@ -67,7 +76,7 @@ export default class SignUp extends Component {
       return true;
     }
     else {
-      alert("Incorect email or password format");
+      toast.show("Invalid email", { type: 'danger' })
     }
   }
 
@@ -76,7 +85,7 @@ export default class SignUp extends Component {
       return true;
     }
     else {
-      alert("Incorect email or password format");
+      toast.show("Invalid password", { type: 'danger' })
     }
   }
 
@@ -138,7 +147,7 @@ export default class SignUp extends Component {
 
           </View>
         </View>
-      </View >
+      </View>
     );
   }
 }

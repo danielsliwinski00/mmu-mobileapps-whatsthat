@@ -27,7 +27,7 @@ export default class Search extends Component {
     }
 
     async search() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/search?limit=20&q=" + this.state.searchText,
+        return fetch("http://localhost:3333/api/1.0.0/search?limit=20&q=" + this.state.searchText,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -48,7 +48,7 @@ export default class Search extends Component {
     }
 
     async addContact(id) {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + id + "/contact",
+        return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/contact",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -80,7 +80,7 @@ export default class Search extends Component {
     }
 
     async fetchAccounts() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/search",
+        return fetch("http://localhost:3333/api/1.0.0/search",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })

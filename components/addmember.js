@@ -35,12 +35,23 @@ export default class AddMember extends Component {
 
 
     async search() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
+        return fetch("http://localhost:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then((response) => {
-                return response.json();
+                if (response.status == 200) {
+                    return response.json();
+                }
+                else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                }
+                else if (response.status == 401) {
+                    toast.show("Unauthorized", { type: 'danger' })
+                }
+                else {
+                    toast.show("Server Error", { type: 'danger' })
+                }
             })
             .then((responseJson) => {
                 this.setState({
@@ -56,7 +67,7 @@ export default class AddMember extends Component {
 
     async fetchContacts() {
         console.log(this.props.route.params.chatMembers)
-        return fetch("http://192.168.1.102:3333/api/1.0.0/contacts",
+        return fetch("http://localhost:3333/api/1.0.0/contacts",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -65,9 +76,11 @@ export default class AddMember extends Component {
                     return response.json();
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorised"
                 }
                 else {
+                    toast.show("Something went wrong", { type: 'danger' })
                     throw "Something went wrong"
                 }
             })
@@ -87,18 +100,18 @@ export default class AddMember extends Component {
             isLoading: true,
         })
         console.log(this.state.chatid, id)
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id.toString(),
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id.toString(),
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then(async (response) => {
                 if (response.status == 200) {
-                    console.log('successfully added member')
                     this.fetchContacts();
                     this.setState({
                         isLoading: false,
                     })
+                    toast.show("Added member", { type: 'success' })
                     this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
                 }
                 else if (response.status == 400) {
@@ -106,18 +119,23 @@ export default class AddMember extends Component {
                         isLoading: false,
                     })
                     this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
+                    toast.show("Bad Request", { type: 'danger' })
                     throw "Bad Request"
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorized"
                 }
                 else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
                     throw "Forbidden"
                 }
                 else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
                 else {
+                    toast.show("Something went wrong", { type: 'danger' })
                     throw "Something went wrong"
                 }
             })
@@ -210,7 +228,7 @@ export default class AddMember extends Component {
                                                     <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
                                                 </View>
                                                 <View style={[{ flex: 2, alignSelf: 'center' }]}>
-                                                    <TouchableOpacity onPress={() => { this.addMember(item.user_id.toString()) }}>
+                                                    <TouchableOpacity onPress={() => { this.addMember(item.user_id) }}>
                                                         <Image style={[styles.addContact]} source={require('./images/addcontact.png')} />
                                                     </TouchableOpacity>
                                                 </View>
@@ -265,7 +283,7 @@ export default class AddMember extends Component {
                                                 <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
                                             </View>
                                             <View style={[{ flex: 2, alignSelf: 'center' }]}>
-                                                <TouchableOpacity onPress={() => { this.addMember(item.user_id.toString()) }}>
+                                                <TouchableOpacity onPress={() => { this.addMember(item.user_id) }}>
                                                     <Image style={[styles.addContact]} source={require('./images/addcontact.png')} />
                                                 </TouchableOpacity>
                                             </View>

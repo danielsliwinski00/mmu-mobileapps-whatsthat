@@ -53,7 +53,7 @@ export default class Chat extends Component {
             messagesData: [],
             viewableMessagesData: [],
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -88,7 +88,7 @@ export default class Chat extends Component {
         this.setState({
             newMessagesData: [],
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -119,7 +119,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message",
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/message",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -155,7 +155,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
             {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -198,7 +198,7 @@ export default class Chat extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/message/" + this.state.messageID,
             {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },

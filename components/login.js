@@ -10,13 +10,13 @@ export default class SignUp extends Component {
     this.state = {
       email: "",
       password: "",
-      emailTest: 'email@mail.com',
+      emailTest: 'test@mail.com',
       passwordTest: 'Password1!',
     }
   }
 
   login() {
-    return fetch("http://192.168.1.102:3333/api/1.0.0/login",
+    return fetch("http://localhost:3333/api/1.0.0/login",
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,8 +29,10 @@ export default class SignUp extends Component {
         if (response.status == 200) {
           return response.json();
         } else if (response.status == 400) {
+          toast.show("Invalid email or password", { type: 'danger' })
           throw "Invalid email or password"
         } else {
+          toast.show("Something went wrong", { type: 'danger' })
           throw "Something went wrong"
         }
       })
@@ -44,6 +46,7 @@ export default class SignUp extends Component {
           })
           this.props.navigation.navigate('AppHome');
         } catch {
+          toast.show("Something went wrong", { type: 'danger' })
           throw "something went wrong"
         }
       })
@@ -57,7 +60,7 @@ export default class SignUp extends Component {
       this.login();
     }
     else {
-      alert("Incorect email or password");
+      toast.show("Invalid email or password", { type: 'danger' })
     }
   }
 
@@ -67,6 +70,10 @@ export default class SignUp extends Component {
 
   passwordChange = (text) => {
     this.setState({ password: text })
+  }
+
+  componentDidMount() {
+
   }
 
   render() {

@@ -28,14 +28,24 @@ export default class Contacts extends Component {
         this.search();
     }
 
-
     async search() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
+        return fetch("http://localhost:3333/api/1.0.0/search?search_in=contacts&q=" + this.state.searchText,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then((response) => {
-                return response.json();
+                if (response.status==200) {
+                    return response.json();
+                }
+                else if (response.status==400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                }
+                else if (response.status==400) {
+                    toast.show("Unauthorized", { type: 'danger' })
+                }
+                else{
+                    toast.show("Server Error", { type: 'danger' })
+                }   
             })
             .then((responseJson) => {
                 this.setState({
@@ -50,7 +60,7 @@ export default class Contacts extends Component {
     }
 
     async fetchContacts() {
-        return fetch("http://192.168.1.102:3333/api/1.0.0/contacts",
+        return fetch("http://localhost:3333/api/1.0.0/contacts",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -80,9 +90,9 @@ export default class Contacts extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + id + "/contact",
+        return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/contact",
             {
-                method: 'delete',
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then(async (response) => {
@@ -114,7 +124,7 @@ export default class Contacts extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/user/" + id + "/block",
+        return fetch("http://localhost:3333/api/1.0.0/user/" + id + "/block",
             {
                 method: 'post',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -151,6 +161,11 @@ export default class Contacts extends Component {
         })
         this.fetchContacts();
 
+        if(this.state.contactsData.length <=0){
+            this.setState({
+                isLoading:false
+            })
+        }
         this.props.navigation.addListener('focus', async () => {
             await this.setState({
                 isLoading: true,

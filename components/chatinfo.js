@@ -22,7 +22,7 @@ export default class ChatInfo extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
@@ -54,7 +54,7 @@ export default class ChatInfo extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid,
             {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
@@ -100,7 +100,7 @@ export default class ChatInfo extends Component {
         this.setState({
             isLoading: true,
         })
-        return fetch("http://192.168.1.102:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id,
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/user/" + id,
             {
                 method: 'delete',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }

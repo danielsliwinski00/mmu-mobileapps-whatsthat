@@ -14,6 +14,7 @@ import AddMember from './components/addmember.js'
 import { NavigationContainer,} from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator, HeaderBackButton } from '@react-navigation/native-stack';
+import Toast from "react-native-toast-notifications";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -104,6 +105,7 @@ export default function App() {
           }}
         />
       </Stack.Navigator>
+      <Toast ref={(ref) => global['toast'] = ref} />
     </NavigationContainer>
   );
 }
