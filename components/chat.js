@@ -5,10 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
 import validation from './validation.js';
 
-function timer() {
-
-}
-
 export default class Chat extends Component {
     constructor(props) {
 
@@ -43,7 +39,17 @@ export default class Chat extends Component {
             draftMessageID: 0,
             viewDraftMessagesModal: false,
             editDraftMessageModal: false,
+            scheduleDraftMessage: false,
             counter: 0,
+            date: new Date(),
+            datepick: false,
+            time: undefined,
+            timepick: false,
+            month: '',
+            day: '',
+            hour: '',
+            minute: '',
+
         }
     }
 
@@ -62,10 +68,20 @@ export default class Chat extends Component {
                     return response.json();
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorized"
                 }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .then(async (responseJson) => {
@@ -97,10 +113,20 @@ export default class Chat extends Component {
                     return response.json();
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorized"
                 }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .then(async (responseJson) => {
@@ -121,7 +147,7 @@ export default class Chat extends Component {
         })
         return fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chatid + "/message",
             {
-                method: 'post',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
                 body: JSON.stringify(
                     {
@@ -134,16 +160,26 @@ export default class Chat extends Component {
                     this.setState({
                         sendMessageText: '',
                     }, () => { this.fetchChatData() })
-                    //this.fetchChatData();
                 }
                 else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
                     throw "Bad Request"
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .catch((error) => {
@@ -167,6 +203,7 @@ export default class Chat extends Component {
             })
             .then((response) => {
                 if (response.status == 200) {
+                    toast.show("Message Edited", { type: 'success' })
                     this.setState({
                         editMessageText: '',
                         messageID: '',
@@ -174,19 +211,24 @@ export default class Chat extends Component {
                     this.fetchChatData()
                 }
                 else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
                     throw "Bad Request"
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
                 else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
                     throw "Forbidden"
                 }
                 else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .catch((error) => {
@@ -205,25 +247,27 @@ export default class Chat extends Component {
             })
             .then((response) => {
                 if (response.status == 200) {
+                    toast.show("Message Deleted", { type: 'success' })
                     this.setState({
                         messageID: '',
                     })
                     this.fetchChatData()
                 }
-                else if (response.status == 400) {
-                    throw "Bad Request"
-                }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
                 else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
                     throw "Forbidden"
                 }
                 else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .catch((error) => {
@@ -338,6 +382,145 @@ export default class Chat extends Component {
                 viewDraftMessagesModal: true
             }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
         }
+    }
+
+    timeDraft() {
+        const current = new Date()
+        let yearTime = current.getFullYear()
+        let yearString = yearTime.toString()
+        let inputTime = new Date(yearString + "-" + this.state.month + "-" + this.state.day + "T" + this.state.hour + ":" + this.state.minute + ":00")
+
+        var drafts = this.state.draftMessages;
+        if (drafts.findIndex(data => data.draftID == this.state.draftMessageID) == 0) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts[index]['time'] = inputTime;
+            drafts[index]['chatID'] = this.state.chatid;
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+                editDraftMessageModal: false,
+                viewDraftMessagesModal: true
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == this.state.draftMessageID)) {
+            let index = drafts.findIndex(data => data.draftID == this.state.draftMessageID)
+            drafts[index]['time'] = inputTime;
+            drafts[index]['chatID'] = this.state.chatid;
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+                editDraftMessageModal: false,
+                viewDraftMessagesModal: true
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+    }
+
+    sendDraft = async (draftid, chatid, message) => {
+        var drafts = this.state.draftMessages;
+        if (drafts.findIndex(data => data.draftID == draftid) == 0) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == draftid)) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + chatid + "/message",
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+                body: JSON.stringify(
+                    {
+                        "message": message
+                    }
+                )
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    toast.show("Draft Message Sent", { type: 'success' })
+                    this.fetchChatData()
+                }
+                else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                    throw "Bad Request"
+                }
+                else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
+                    throw "Unauthorised"
+                }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
+                else {
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    checkDraftTimes() {
+        var drafts = this.state.draftMessages;
+        let date = new Date()
+        let time = date
+        time.setSeconds(0);
+        time.setMilliseconds(0);
+        let timeFinal = new Date(time.toISOString())
+
+        for (let i = 0; i < drafts.length; i++) {
+            console.log(time)
+            let draftDate = new Date(drafts[i].time)
+            console.log(draftDate)
+            if (draftDate.getTime() == timeFinal.getTime()) {
+                let draftid = drafts[i].draftID
+                let chatid = drafts[i].chatID
+                let message = drafts[i].message
+                this.sendDraft(draftid, chatid, message)
+            }
+            else {
+                console.log('not same time')
+            }
+        }
+    }
+
+    onChangeMonth(input) {
+        input = input.replace(/[^0-9]/g, '')
+        this.setState({
+            month: input
+        });
+    }
+    onChangeDay(input) {
+        input = input.replace(/[^0-9]/g, '')
+        this.setState({
+            day: input
+        });
+    }
+    onChangeHour(input) {
+        input = input.replace(/[^0-9]/g, '')
+        this.setState({
+            hour: input
+        });
+    }
+    onChangeMinute(input) {
+        input = input.replace(/[^0-9]/g, '')
+        this.setState({
+            minute: input
+        });
     }
 
     changeMessageText = (text) => {
@@ -529,19 +712,23 @@ export default class Chat extends Component {
         }
 
         this.fetchChatData()
-        this.timerId = setInterval(() => { this.fetchChatDataUpdate() }, 2000)
+        this.timerID = setInterval(() => { this.fetchChatDataUpdate() }, 2000)
+        this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
         this.props.navigation.addListener('focus', async () => {
             await this.setState({
                 isLoading: true,
             })
             this.fetchChatData()
-            this.timerId = setInterval(() => { this.fetchChatDataUpdate() }, 2000)
+            this.timerID = setInterval(() => { this.fetchChatDataUpdate() }, 2000)
+            this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
         });
     }
 
     componentWillUnmount() {
-        clearInterval(this.timerId)
+        clearInterval(this.timerID),
+        clearInterval(this.draftTimerID),
+        console.log('unmounted')
     }
 
     render() {
@@ -562,22 +749,22 @@ export default class Chat extends Component {
                             <ActivityIndicator style={[styles.activityIndicator]} />
                         </View>
                         <View style={[styles.sendMessageView,]}>
-                        <TouchableOpacity onLongPress={() => { this.setState({ draftMessageModal: true }) }}>
-                            <TextInput
-                                onSubmitEditing={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}
-                                value={this.state.sendMessageText}
-                                style={[styles.sendMessageTextInput,]}
-                                placeholder='Aa'
-                                onChangeText={this.changeMessageText}>
-                            </TextInput>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.sendMessageButton,]}
-                            onPress={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}>
-                            <Text style={[styles.sendMessageButtonText,]}>
-                                Send
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                            <TouchableOpacity onLongPress={() => { this.setState({ draftMessageModal: true }) }}>
+                                <TextInput
+                                    onSubmitEditing={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}
+                                    value={this.state.sendMessageText}
+                                    style={[styles.sendMessageTextInput,]}
+                                    placeholder='Aa'
+                                    onChangeText={this.changeMessageText}>
+                                </TextInput>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.sendMessageButton,]}
+                                onPress={() => { if (this.state.sendMessageText == '') { } else { this.sendMessage(this.state.sendMessageText) } }}>
+                                <Text style={[styles.sendMessageButtonText,]}>
+                                    Send
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             );
@@ -665,6 +852,65 @@ export default class Chat extends Component {
                 <Modal
                     animationType="fade"
                     transparent={true}
+                    visible={this.state.scheduleDraftMessage}
+                    onRequestClose={() => {
+                        this.setState({ scheduleDraftMessage: false });
+                    }}>
+                    <TouchableOpacity
+                        style={[styles.modalOpacity]}
+                        activeOpacity={1}
+                        onPress={() => { this.setState({ scheduleDraftMessage: false }) }}
+                    >
+                        <TouchableHighlight style={[styles.modalTouchableHighlight3Button]}>
+                            <View style={[styles.modalViewButtons,]}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <TextInput
+                                        style={{ width: '20%', marginLeft: 10, marginTop: 10 }}
+                                        placeholder='Month 01-12'
+                                        value={this.state.month}
+                                        onChangeText={(text) => this.onChangeMonth(text)}
+                                    />
+                                    <TextInput
+                                        style={{ width: '20%', marginLeft: 10, marginTop: 10 }}
+                                        placeholder='Day 01-31'
+                                        value={this.state.day}
+                                        onChangeText={(text) => this.onChangeDay(text)}
+                                    />
+                                    <TextInput
+                                        style={{ width: '20%', marginLeft: 10, marginTop: 10 }}
+                                        placeholder='Hour 00-23'
+                                        value={this.state.hour}
+                                        onChangeText={(text) => this.onChangeHour(text)}
+                                    />
+                                    <TextInput
+                                        style={{ width: '20%', marginLeft: 10, marginTop: 10 }}
+                                        placeholder='Minute 00-59'
+                                        value={this.state.minute}
+                                        onChangeText={(text) => this.onChangeMinute(text)}
+                                    />
+                                </View>
+                                <TouchableOpacity
+                                    style={[styles.modal3Button]}
+                                    onPress={() => { this.timeDraft(), this.setState({ scheduleDraftMessage: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Confirm
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal3ButtonCancel, {}]}
+                                    onPress={() => { this.setState({ scheduleDraftMessage: false, draftMessageModalDetails: true }) }}>
+                                    <Text style={[styles.modalButtonText,]}>
+                                        Cancel
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableHighlight>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
                     visible={this.state.draftMessageModalDetails}
                     onRequestClose={() => {
                         this.setState({ draftMessageModalDetails: false });
@@ -674,31 +920,38 @@ export default class Chat extends Component {
                         activeOpacity={1}
                         onPress={() => { this.setState({ draftMessageModalDetails: false }) }}
                     >
-                        <TouchableHighlight style={[styles.modalTouchableHighlight4Button]}>
+                        <TouchableHighlight style={[styles.modalTouchableHighlight5Button]}>
                             <View style={[styles.modalViewButtons,]}>
                                 <TouchableOpacity
-                                    style={[styles.modal4Button]}
+                                    style={[styles.modal5Button]}
                                     onPress={() => { this.setState({ editDraftMessageModal: true, draftMessageModalDetails: false }) }}>
                                     <Text style={[styles.modalButtonText]}>
                                         Edit draft message
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.modal4Button]}
+                                    style={[styles.modal5Button]}
                                     onPress={() => { this.loadDraftMessage(), this.setState({ draftMessageModalDetails: false, }) }}>
                                     <Text style={[styles.modalButtonText]}>
                                         Load draft message
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.modal4Button]}
+                                    style={[styles.modal5Button]}
                                     onPress={() => { this.deleteDraftMessage(), this.setState({ draftMessageModalDetails: false, }) }}>
                                     <Text style={[styles.modalButtonText]}>
                                         Delete draft message
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={[styles.modal4ButtonCancel, {}]}
+                                    style={[styles.modal5Button]}
+                                    onPress={() => { this.setState({ scheduleDraftMessage: true, draftMessageModalDetails: false, }) }}>
+                                    <Text style={[styles.modalButtonText]}>
+                                        Send draft message at
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modal5ButtonCancel, {}]}
                                     onPress={() => { this.setState({ draftMessageModalDetails: false, viewDraftMessagesModal: true }) }}>
                                     <Text style={[styles.modalButtonText,]}>
                                         Cancel

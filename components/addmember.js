@@ -23,6 +23,7 @@ export default class AddMember extends Component {
             chatid: '',
             members: [],
             adduserid: 0,
+            draftMessages:[],
         }
     }
 
@@ -45,12 +46,15 @@ export default class AddMember extends Component {
                 }
                 else if (response.status == 400) {
                     toast.show("Bad Request", { type: 'danger' })
+                    throw "Bad Request"
                 }
                 else if (response.status == 401) {
                     toast.show("Unauthorized", { type: 'danger' })
+                    throw "Unauthorised"
                 }
                 else {
-                    toast.show("Server Error", { type: 'danger' })
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .then((responseJson) => {
@@ -107,11 +111,11 @@ export default class AddMember extends Component {
             })
             .then(async (response) => {
                 if (response.status == 200) {
+                    toast.show("Added Member", { type: 'success' })
                     this.fetchContacts();
                     this.setState({
                         isLoading: false,
                     })
-                    toast.show("Added member", { type: 'success' })
                     this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
                 }
                 else if (response.status == 400) {
@@ -136,7 +140,7 @@ export default class AddMember extends Component {
                 }
                 else {
                     toast.show("Something went wrong", { type: 'danger' })
-                    throw "Something went wrong"
+                    throw "Server Error"
                 }
             })
             .catch((error) => {
@@ -155,7 +159,105 @@ export default class AddMember extends Component {
         }
     }
 
+    searchTextChange = (text) => {
+        this.setState({ searchText: text })
+    }
+
+
+    sendDraft = async (draftid, chatid, message) => {
+        var drafts = this.state.draftMessages;
+        if (drafts.findIndex(data => data.draftID == draftid) == 0) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == draftid)) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + chatid + "/message",
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+                body: JSON.stringify(
+                    {
+                        "message": message
+                    }
+                )
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    toast.show("Draft Message Sent", { type: 'success' })
+                }
+                else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                    throw "Bad Request"
+                }
+                else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
+                    throw "Unauthorised"
+                }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
+                else {
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    checkDraftTimes() {
+        var drafts = this.state.draftMessages;
+        let date = new Date()
+        let time = date
+        time.setSeconds(0);
+        time.setMilliseconds(0);
+        let timeFinal = new Date(time.toISOString())
+
+        for (let i = 0; i < drafts.length; i++) {
+            console.log(time)
+            let draftDate = new Date(drafts[i].time)
+            console.log(draftDate)
+            if (draftDate.getTime() == timeFinal.getTime()) {
+                let draftid = drafts[i].draftID
+                let chatid = drafts[i].chatID
+                let message = drafts[i].message
+                this.sendDraft(draftid, chatid, message)
+            }
+            else {
+                console.log('not same time')
+            }
+        }
+    }
+
     async componentDidMount() {
+        if (await AsyncStorage.getItem("draftMessages") == 'undefined') {
+            await this.setState({
+                draftMessages: await AsyncStorage.getItem("draftMessages"),
+            })
+        }
+        else {
+            await this.setState({
+                draftMessages: JSON.parse(await AsyncStorage.getItem("draftMessages")),
+            })
+        }
+
         this.setState({
             isLoading: true,
             userID: await AsyncStorage.getItem("whatsthatID"),
@@ -163,17 +265,20 @@ export default class AddMember extends Component {
             members: this.props.route.params.chatMembers,
         })
         this.fetchContacts();
+        this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
         this.props.navigation.addListener('focus', async () => {
             await this.setState({
                 isLoading: true,
             })
             this.fetchContacts()
+            this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
         });
     }
 
-    searchTextChange = (text) => {
-        this.setState({ searchText: text })
+    componentWillUnmount() {
+        clearInterval(this.draftTimerID),
+        console.log('unmounted')
     }
 
     render() {

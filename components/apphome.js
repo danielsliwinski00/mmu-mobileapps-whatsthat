@@ -34,6 +34,7 @@ export default class AppHome extends Component {
                 <Tab.Navigator
                 screenOptions={{
                     tabBarActiveBackgroundColor: '#ffffff', tabBarInactiveBackgroundColor: '#2A2F4F',
+                    unmountOnBlur: true
                 }}
                 >
                     <Tab.Screen name='Chats' component={Chats}

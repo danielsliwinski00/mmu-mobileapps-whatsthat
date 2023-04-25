@@ -16,6 +16,7 @@ export default class Search extends Component {
             userID: '',
             searchText: '',
             searchID: '',
+            draftMessages:[],
         }
     }
 
@@ -27,12 +28,26 @@ export default class Search extends Component {
     }
 
     async search() {
-        return fetch("http://localhost:3333/api/1.0.0/search?limit=20&q=" + this.state.searchText,
+        return fetch("http://localhost:3333/api/1.0.0/search?limit=50&q=" + this.state.searchText,
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then((response) => {
-                return response.json();
+                if (response.status == 200) {
+                    return response.json()
+                }
+                else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                    throw "Bad Request"
+                }
+                else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
+                    throw "Unauthorized"
+                }
+                else {
+                    toast.show("Server Error", { type: 'danger' })
+                    throw "Server Error"
+                }
             })
             .then((responseJson) => {
                 this.setState({
@@ -55,6 +70,7 @@ export default class Search extends Component {
             })
             .then(async (response) => {
                 if (response.status == 200) {
+                    toast.show("Contact Added", { type: 'success' })
                     this.fetchAccounts();
                     this.setState({
                         searchID: '',
@@ -62,16 +78,20 @@ export default class Search extends Component {
                     this.props.navigation.pop()
                 }
                 else if (response.status == 400) {
+                    toast.show("You can't add yourself as a contact", { type: 'danger' })
                     throw "You can't add yourself as a contact"
                 }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorized"
                 }
                 else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .catch((error) => {
@@ -88,11 +108,17 @@ export default class Search extends Component {
                 if (response.status == 200) {
                     return response.json();
                 }
+                else if (response.status == 400) {
+                    toast.show("Unauthorised", { type: 'danger' })
+                    throw "Bad Request"
+                }
                 else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
                 else {
-                    throw "Something went wrong"
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
                 }
             })
             .then((responseJson) => {
@@ -114,11 +140,115 @@ export default class Search extends Component {
         this.setState({ searchID: text })
     }
 
+
+    sendDraft = async (draftid, chatid, message) => {
+        var drafts = this.state.draftMessages;
+        if (drafts.findIndex(data => data.draftID == draftid) == 0) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        else if (drafts.findIndex(data => data.draftID == draftid)) {
+            let index = drafts.findIndex(data => data.draftID == draftid)
+            drafts[index].time = ""
+            this.setState({
+                draftMessages: drafts,
+                counter: this.state.counter += 1,
+            }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+        }
+        return fetch("http://localhost:3333/api/1.0.0/chat/" + chatid + "/message",
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+                body: JSON.stringify(
+                    {
+                        "message": message
+                    }
+                )
+            })
+            .then((response) => {
+                if (response.status == 200) {
+                    toast.show("Draft Message Sent", { type: 'success' })
+                }
+                else if (response.status == 400) {
+                    toast.show("Bad Request", { type: 'danger' })
+                    throw "Bad Request"
+                }
+                else if (response.status == 401) {
+                    toast.show("Unauthorised", { type: 'danger' })
+                    throw "Unauthorised"
+                }
+                else if (response.status == 403) {
+                    toast.show("Forbidden", { type: 'danger' })
+                    throw "Forbidden"
+                }
+                else if (response.status == 404) {
+                    toast.show("Not Found", { type: 'danger' })
+                    throw "Not Found"
+                }
+                else {
+                    toast.show("Something went wrong", { type: 'danger' })
+                    throw "Server Error"
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    checkDraftTimes() {
+        var drafts = this.state.draftMessages;
+        let date = new Date()
+        let time = date
+        time.setSeconds(0);
+        time.setMilliseconds(0);
+        let timeFinal = new Date(time.toISOString())
+
+        for (let i = 0; i < drafts.length; i++) {
+            console.log(time)
+            let draftDate = new Date(drafts[i].time)
+            console.log(draftDate)
+            if (draftDate.getTime() == timeFinal.getTime()) {
+                let draftid = drafts[i].draftID
+                let chatid = drafts[i].chatID
+                let message = drafts[i].message
+                this.sendDraft(draftid, chatid, message)
+            }
+            else {
+                console.log('not same time')
+            }
+        }
+    }
+
     async componentDidMount() {
+        if (await AsyncStorage.getItem("draftMessages") == 'undefined') {
+            await this.setState({
+                draftMessages: await AsyncStorage.getItem("draftMessages"),
+            })
+        }
+        else {
+            await this.setState({
+                draftMessages: JSON.parse(await AsyncStorage.getItem("draftMessages")),
+            })
+        }
+
         this.setState({
             userID: await AsyncStorage.getItem("whatsthatID")
         })
         this.fetchAccounts();
+        this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
+
+        this.props.navigation.addListener('focus', async () => {
+            this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
+        });
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.draftTimerID),
+        console.log('unmounted')
     }
 
     render() {

@@ -24,6 +24,7 @@ export default class Profile extends Component {
       emailChanged: false,
       passwordChanged: false,
       userPhoto: undefined,
+      draftMessages:[],
     }
   }
 
@@ -41,9 +42,11 @@ export default class Profile extends Component {
         }
         else if (response.status == 404) {
           toast.show("Not Found", { type: 'danger' })
+          throw 'Not Found'
         }
         else {
-          toast.show("Server Error", { type: 'danger' })
+          toast.show("Something went wrong", { type: 'danger' })
+          throw 'Server Error'
         }
       })
       .then((responseJson) => {
@@ -54,6 +57,7 @@ export default class Profile extends Component {
           lastName: responseJson.last_name,
           email: responseJson.email,
           isLoading: false,
+          profileEdit: false
         })
       })
       .catch((error) => {
@@ -81,8 +85,8 @@ export default class Profile extends Component {
           this.props.navigation.navigate('Home');
         }
         else {
-          toast.show("Server error", { type: 'danger' })
-          throw "Something went wrong"
+          toast.show("Something went wrong", { type: 'danger' })
+          throw "Server Error"
         }
       })
       .catch((error) => {
@@ -96,32 +100,28 @@ export default class Profile extends Component {
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-        body: JSON.stringify({
-          'first_name': this.state.profileUpdateData.first_name,
-          'last_name': this.state.profileUpdateData.last_name,
-          'email': this.state.profileUpdateData.email,
-          'password': this.state.profileUpdateData.password
-        })
+        body: JSON.stringify(this.state.profileUpdateData)
       })
       .then((response) => {
         if (response.status == 200) {
           toast.show("User Updated", { type: 'success' })
           this.userInfo();
         }
-        if (response.status == 400) {
+        else if (response.status == 400) {
           toast.show("Bad Request", { type: 'danger' })
         }
-        if (response.status == 401) {
+        else if (response.status == 401) {
           toast.show("Unauthorized", { type: 'danger' })
         }
-        if (response.status == 403) {
+        else if (response.status == 403) {
           toast.show("Forbidden", { type: 'danger' })
         }
-        if (response.status == 404) {
+        else if (response.status == 404) {
           toast.show("Not Found", { type: 'danger' })
         }
         else {
-          toast.show("Server Error", { type: 'danger' })
+          toast.show("Something went wrong", { type: 'danger' })
+          throw "Server Error"
         }
       })
       .catch((error) => {
@@ -130,21 +130,21 @@ export default class Profile extends Component {
   }
 
   async updateUserRequest() {
-    var updated = this.state.profileData
-    if (this.state.firstName != this.state.profileData.first_name) {
-      updated.first_name = this.state.firstName
+    var updated = {}
+    if (this.state.firstName != this.state.profileData.first_name && this.state.firstName != '') {
+      updated['first_name'] = this.state.firstName
     }
-    if (this.state.lastName != this.state.profileData.last_name) {
-      updated.last_name = this.state.lastName
+    if (this.state.lastName != this.state.profileData.last_name && this.state.firstName != '') {
+      updated['last_name'] = this.state.lastName
     }
-    if (this.state.email != this.state.profileData.email) {
+    if (this.state.email != this.state.profileData.email && this.state.email != '') {
       if (this.validateEmail(this.state.email, "email") == true) {
-        updated.email = this.state.email
+        updated['email'] = this.state.email
       }
     }
     if (this.state.passwordChanged == true) {
       if (this.validatePassword(this.state.password, "password") == true) {
-        updated.password = this.state.password
+        updated['password'] = this.state.password
       }
     }
     this.setState({
@@ -161,7 +161,7 @@ export default class Profile extends Component {
           'password': this.state.password,
         })
       })
-      .then((response) => {
+      .then(() => {
         console.log("successfully changed password");
       })
       .catch((error) => {
@@ -230,8 +230,111 @@ export default class Profile extends Component {
     this.setState({ password: text, passwordChanged: true, })
   }
 
-  componentDidMount() {
+  sendDraft = async (draftid, chatid, message) => {
+    var drafts = this.state.draftMessages;
+    if (drafts.findIndex(data => data.draftID == draftid) == 0) {
+      let index = drafts.findIndex(data => data.draftID == draftid)
+      drafts[index].time = ""
+      this.setState({
+        draftMessages: drafts,
+        counter: this.state.counter += 1,
+      }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+    }
+    else if (drafts.findIndex(data => data.draftID == draftid)) {
+      let index = drafts.findIndex(data => data.draftID == draftid)
+      drafts[index].time = ""
+      this.setState({
+        draftMessages: drafts,
+        counter: this.state.counter += 1,
+      }, async () => { await AsyncStorage.setItem("draftMessages", JSON.stringify(this.state.draftMessages)) })
+    }
+    return fetch("http://localhost:3333/api/1.0.0/chat/" + chatid + "/message",
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+        body: JSON.stringify(
+          {
+            "message": message
+          }
+        )
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          toast.show("Draft Message Sent", { type: 'success' })
+        }
+        else if (response.status == 400) {
+          toast.show("Bad Request", { type: 'danger' })
+          throw "Bad Request"
+        }
+        else if (response.status == 401) {
+          toast.show("Unauthorised", { type: 'danger' })
+          throw "Unauthorised"
+        }
+        else if (response.status == 403) {
+          toast.show("Forbidden", { type: 'danger' })
+          throw "Forbidden"
+        }
+        else if (response.status == 404) {
+          toast.show("Not Found", { type: 'danger' })
+          throw "Not Found"
+        }
+        else {
+          toast.show("Something went wrong", { type: 'danger' })
+          throw "Server Error"
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  checkDraftTimes() {
+    var drafts = this.state.draftMessages;
+    let date = new Date()
+    let time = date
+    time.setSeconds(0);
+    time.setMilliseconds(0);
+    let timeFinal = new Date(time.toISOString())
+
+    for (let i = 0; i < drafts.length; i++) {
+      console.log(time)
+      let draftDate = new Date(drafts[i].time)
+      console.log(draftDate)
+      if (draftDate.getTime() == timeFinal.getTime()) {
+        let draftid = drafts[i].draftID
+        let chatid = drafts[i].chatID
+        let message = drafts[i].message
+        this.sendDraft(draftid, chatid, message)
+      }
+      else {
+        console.log('not same time')
+      }
+    }
+  }
+
+  async componentDidMount() {
+    if (await AsyncStorage.getItem("draftMessages") == 'undefined') {
+      await this.setState({
+        draftMessages: await AsyncStorage.getItem("draftMessages"),
+      })
+    }
+    else {
+      await this.setState({
+        draftMessages: JSON.parse(await AsyncStorage.getItem("draftMessages")),
+      })
+    }
+
     this.userInfo();
+    this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
+
+    this.props.navigation.addListener('focus', async () => {
+      this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
+    });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.draftTimerID),
+    console.log('unmounted')
   }
 
   render() {
