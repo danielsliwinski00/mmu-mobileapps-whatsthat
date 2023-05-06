@@ -21,17 +21,45 @@ export default class Profile extends Component {
       email: "",
       password: "",
       dataReceived: false,
-      fnameChanged: false,
-      lnameChanged: false,
-      emailChanged: false,
       passwordChanged: false,
       userPhoto: undefined,
       draftMessages: [],
-      location: null,
-      errorMessage: null,
-      permission: false,
       photoU: false,
+      profilePhoto: undefined,
     }
+  }
+
+  async userProfilePhoto() {
+    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID") + "/photo",
+      {
+        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          return response.blob();
+        }
+        else if (response.status == 401) {
+          toast.show("Unauthorized", { type: 'danger' })
+        }
+        else if (response.status == 404) {
+          toast.show("Not Found", { type: 'danger' })
+          throw 'Not Found'
+        }
+        else {
+          toast.show("Something went wrong", { type: 'danger' })
+          throw 'Server Error'
+        }
+      })
+      .then((responseBlob) => {
+        let data = URL.createObjectURL(responseBlob)
+        this.setState({
+          profilePhoto: data,
+          isLoading: false,
+        })
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   async userInfo() {
@@ -62,8 +90,7 @@ export default class Profile extends Component {
           firstName: responseJson.first_name,
           lastName: responseJson.last_name,
           email: responseJson.email,
-          isLoading: false,
-        })
+        }, () => { this.userProfilePhoto() })
       })
       .catch((error) => {
         console.log(error);
@@ -115,7 +142,8 @@ export default class Profile extends Component {
       })
       .then((response) => {
         if (response.status == 200) {
-          toast.show("User Updated", { type: 'success' })
+          //toast.show("User Updated", { type: 'success' })
+          this.setState({ profileEdit: false })
           this.userInfo();
         }
         else if (response.status == 400) {
@@ -161,41 +189,6 @@ export default class Profile extends Component {
     this.setState({
       profileUpdateData: updated
     }, () => { this.updateUserInfo(); })
-  }
-
-  async uploadPhoto() {
-    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID") + "/photo",
-      {
-        method: 'POST ',
-        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-        body: JSON.stringify({
-          'password': this.state.password,
-        })
-      })
-      .then(() => {
-        console.log("successfully changed password");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
-  async getPhoto() {
-    return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID") + "/photo",
-      {
-        headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") },
-      })
-      .then((response) => {
-        return response.JSON()
-      })
-      .then((responseJson) => {
-        this.setState({
-          userPhoto: responseJson
-        })
-      })
-      .catch((error) => {
-        console.log(error);
-      });
   }
 
   updateUser() {
@@ -372,7 +365,17 @@ export default class Profile extends Component {
     }
     if (this.state.photoU == true) {
       return (
-        <CameraBasic />
+        <View style={{ flex: 1 }}>
+          <View style={{ flex: 14 }}>
+            <CameraBasic />
+          </View>
+          <View style={{ flex: 2 }}>
+            <TouchableOpacity style={[styles.box]}
+              onPress={() => { this.userInfo(); this.setState({ photoU: false }) }}>
+              <Text style={[styles.profileText]}>Back/Cancel</Text>
+            </TouchableOpacity >
+          </View>
+        </View>
       )
     }
     if (this.state.profileEdit == true) {
@@ -386,6 +389,10 @@ export default class Profile extends Component {
             </View>
             <ScrollView style={[{ flex: 8, }]}>
               <View style={[{ flex: 1 }]}>
+                <Text style={[styles.profileText,]}>
+                  Photo:
+                </Text>
+                <Image style={{ width: 80, height: 80, marginLeft: 20 }} source={{ uri: this.state.profilePhoto }} />
                 <Text style={[styles.profileText]}>
                   First Name:
                 </Text>
@@ -424,23 +431,31 @@ export default class Profile extends Component {
                 />
               </View>
             </ScrollView>
-            <View style={[{ flex: 3, justifyContent: 'flex-end' }]}>
-              <TouchableOpacity
-                style={styles.box}
-                title='updatebtn'
-                onPress={() => this.updateUser()}>
-                <Text style={[styles.profileTextInput,]}>Update User Info
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.box}
-                title='updatebtn'
-                onPress={() => this.setState({
-                  profileEdit: false,
-                })}>
-                <Text style={[styles.profileTextInput,]}>Cancel
-                </Text>
-              </TouchableOpacity>
+            <View style={[{ flex: 3 }]}>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity
+                  style={[styles.box, { flex: 1 }]}
+                  title='updatebtn'
+                  onPress={() => this.updateUser()}>
+                  <Text style={[styles.profileTextInput, { fontSize: 16 }]}>Update User Info
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.box, { flex: 1 }]}
+                  onPress={() => this.setState({ photoU: true })}>
+                  <Text style={[styles.profileText, { fontSize: 16 }]}>Update Photo</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity
+                  style={styles.box}
+                  title='updatebtn'
+                  onPress={() => this.setState({
+                    profileEdit: false,
+                  })}>
+                  <Text style={[styles.profileTextInput,]}>Back/Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -454,7 +469,11 @@ export default class Profile extends Component {
               Profile
             </Text>
           </View>
-          <View style={[{ flex: 7, justifyContent: 'flex-start' }]}>
+          <ScrollView style={[{ flex: 7 }]}>
+            <Text style={[styles.profileText,]}>
+              Photo:
+            </Text>
+            <Image style={{ width: 80, height: 80, marginLeft: 20 }} source={{ uri: this.state.profilePhoto }} />
             <Text style={[styles.profileText,]}>
               First Name:{'\n'}{this.state.firstName}
             </Text>
@@ -464,15 +483,11 @@ export default class Profile extends Component {
             <Text style={[styles.profileText,]}>
               Email:{'\n'}{this.state.email}
             </Text>
-          </View>
-          <View style={[{ flex: 6, justifyContent: 'flex-end' }]}>
+          </ScrollView>
+          <View style={[{ flex: 3, justifyContent: 'flex-end' }]}>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.setState({ profileEdit: true })}>
               <Text style={[styles.profileText]}>Update Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.box]}
-              onPress={() => this.setState({ photoU: true })}>
-              <Text style={[styles.profileText]}>Update Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.logOut()}>
