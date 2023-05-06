@@ -99,6 +99,12 @@ export default class Profile extends Component {
       });
   }
 
+  async logOutLoading() {
+    await AsyncStorage.removeItem("whatsthatID")
+    await AsyncStorage.removeItem("whatsthatSessionToken")
+    this.props.navigation.navigate('Home');
+  }
+
   async updateUserInfo() {
     console.log(this.state.profileUpdateData)
     return fetch("http://localhost:3333/api/1.0.0/user/" + await AsyncStorage.getItem("whatsthatID"),
@@ -333,7 +339,6 @@ export default class Profile extends Component {
     this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
     this.props.navigation.addListener('focus', async () => {
-      this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
     });
   }
 
@@ -355,15 +360,19 @@ export default class Profile extends Component {
             <View style={[styles.activityIndicatorView]}>
               <ActivityIndicator style={[styles.activityIndicator]} />
             </View>
+            <View style={[{ justifyContent: 'flex-end' }]}>
+              <TouchableOpacity style={[styles.box]}
+                onPress={() => this.logOutLoading()}>
+                <Text style={[styles.profileText]}>Log out</Text>
+              </TouchableOpacity >
+            </View>
           </View>
         </View>
       );
     }
     if (this.state.photoU == true) {
       return (
-        <View>
-          <CameraBasic />
-        </View>
+        <CameraBasic />
       )
     }
     if (this.state.profileEdit == true) {

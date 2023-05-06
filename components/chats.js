@@ -334,7 +334,6 @@ export default class Chats extends Component {
                 createChatName: '',
             })
             this.fetchChatsUpdate()
-            this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
         });
     }
 
