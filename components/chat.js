@@ -551,7 +551,6 @@ export default class Chat extends Component {
         var oldMessages = this.state.messagesData
         const newMessages = this.state.newMessagesData
 
-
         if (oldMessages.length !== newMessages.length) {
             if (oldMessages.length > newMessages.length) {
                 this.setState({
@@ -582,7 +581,6 @@ export default class Chat extends Component {
 
     addNewMessages() {
         const showMessages = []
-        console.log(this.state.messagesData.length, this.state.newMessagesData.length, this.state.messagesData[0], this.state.newMessagesData[0])
         for (var i = this.state.messagesData.length; i < this.state.newMessagesData.length; i++) {
             showMessages.push(this.state.newMessagesData[0])
         }
@@ -791,7 +789,7 @@ export default class Chat extends Component {
                                     onPress={() => {
                                         this.setState({ modalVisible: false }),
                                             clearInterval(this.timerId),
-                                            this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid })
+                                            this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid, members:this.state.chatData.members })
                                     }}
                                 >
                                     <Text style={[styles.modalButtonText]}>

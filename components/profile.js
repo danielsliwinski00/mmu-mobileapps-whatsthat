@@ -5,6 +5,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationEvents } from 'react-navigation';
 import styles from './stylesheet.js';
 import validation from './validation.js';
+import CameraBasic from './camera.js';
+import { Camera } from 'expo-camera';
 
 export default class Profile extends Component {
   constructor(props) {
@@ -24,7 +26,11 @@ export default class Profile extends Component {
       emailChanged: false,
       passwordChanged: false,
       userPhoto: undefined,
-      draftMessages:[],
+      draftMessages: [],
+      location: null,
+      errorMessage: null,
+      permission: false,
+      photoU: false,
     }
   }
 
@@ -57,7 +63,6 @@ export default class Profile extends Component {
           lastName: responseJson.last_name,
           email: responseJson.email,
           isLoading: false,
-          profileEdit: false
         })
       })
       .catch((error) => {
@@ -334,7 +339,7 @@ export default class Profile extends Component {
 
   componentWillUnmount() {
     clearInterval(this.draftTimerID),
-    console.log('unmounted')
+      console.log('unmounted')
   }
 
   render() {
@@ -353,6 +358,13 @@ export default class Profile extends Component {
           </View>
         </View>
       );
+    }
+    if (this.state.photoU == true) {
+      return (
+        <View>
+          <CameraBasic />
+        </View>
+      )
     }
     if (this.state.profileEdit == true) {
       return (
@@ -444,10 +456,14 @@ export default class Profile extends Component {
               Email:{'\n'}{this.state.email}
             </Text>
           </View>
-          <View style={[{ flex: 4, justifyContent: 'flex-end' }]}>
+          <View style={[{ flex: 6, justifyContent: 'flex-end' }]}>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.setState({ profileEdit: true })}>
               <Text style={[styles.profileText]}>Update Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.box]}
+              onPress={() => this.setState({ photoU: true })}>
+              <Text style={[styles.profileText]}>Update Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.box]}
               onPress={() => this.logOut()}>

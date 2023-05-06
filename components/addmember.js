@@ -23,7 +23,8 @@ export default class AddMember extends Component {
             chatid: '',
             members: [],
             adduserid: 0,
-            draftMessages:[],
+            draftMessages: [],
+            userMember: false,
         }
     }
 
@@ -70,7 +71,6 @@ export default class AddMember extends Component {
     }
 
     async fetchContacts() {
-        console.log(this.props.route.params.chatMembers)
         return fetch("http://localhost:3333/api/1.0.0/contacts",
             {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
@@ -91,8 +91,8 @@ export default class AddMember extends Component {
             .then((responseJson) => {
                 this.setState({
                     contactsData: responseJson,
-                    isLoading: false,
-                })
+                    isLoading: false
+                },()=>{console.log(this.state.members, this.state.contactsData)})
             })
             .catch((error) => {
                 console.log(error);
@@ -146,17 +146,6 @@ export default class AddMember extends Component {
             .catch((error) => {
                 console.log(error);
             });
-    }
-
-    isUserMember = (id) => {
-        var arr = this.state.members
-
-        if (arr.findIndex(data => data.user_id == id)) {
-            return true
-        }
-        else {
-            return false
-        }
     }
 
     searchTextChange = (text) => {
@@ -264,7 +253,7 @@ export default class AddMember extends Component {
             chatid: this.props.route.params.chatID.toString(),
             members: this.props.route.params.chatMembers,
         })
-        this.fetchContacts();
+        this.fetchContacts()
         this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
         this.props.navigation.addListener('focus', async () => {
@@ -278,7 +267,7 @@ export default class AddMember extends Component {
 
     componentWillUnmount() {
         clearInterval(this.draftTimerID),
-        console.log('unmounted')
+            console.log('unmounted')
     }
 
     render() {
@@ -321,8 +310,6 @@ export default class AddMember extends Component {
                                 keyExtractor={item => item.user_id}
                                 renderItem={({ item }) => {
                                     if (item.user_id == this.state.userID) {
-                                        return
-                                    } else if (!this.isUserMember(item.user_id)) {
                                         return
                                     } else {
                                         return (
@@ -375,24 +362,26 @@ export default class AddMember extends Component {
                             data={this.state.contactsData}
                             keyExtractor={item => item.user_id}
                             renderItem={({ item }) => {
-                                if (item.user_id == this.state.userID) {
-                                    return
-                                } else if (!this.isUserMember(item.user_id)) {
-                                    return
-                                } else {
-                                    return (
-                                        <View style={[styles.contactBox,]}>
-                                            <View style={[styles.contactInfoBox]}>
-                                                <Text style={[styles.contactInfoName,]}>{item.first_name} {item.last_name}</Text>
-                                                <Text style={[styles.contactInfoEmail,]}>{item.email}</Text>
-                                                <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
-                                            </View>
-                                            <View style={[{ flex: 2, alignSelf: 'center' }]}>
-                                                <TouchableOpacity onPress={() => { this.addMember(item.user_id) }}>
-                                                    <Image style={[styles.addContact]} source={require('./images/addcontact.png')} />
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>)
+                                {
+                                    if (item.user_id == this.state.userID) {
+                                    }
+                                    else if (this.state.members.findIndex(data => data.user_id == item.user_id) == true) {
+                                    }
+                                    else {
+                                        return (
+                                            <View style={[styles.contactBox,]}>
+                                                <View style={[styles.contactInfoBox]}>
+                                                    <Text style={[styles.contactInfoName,]}>{item.first_name} {item.last_name}</Text>
+                                                    <Text style={[styles.contactInfoEmail,]}>{item.email}</Text>
+                                                    <Text style={[styles.contactInfoUserID,]}>User ID: {item.user_id} </Text>
+                                                </View>
+                                                <View style={[{ flex: 2, alignSelf: 'center' }]}>
+                                                    <TouchableOpacity onPress={() => { this.addMember(item.user_id) }}>
+                                                        <Image style={[styles.addContact]} source={require('./images/addcontact.png')} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>)
+                                    }
                                 }
                             }}
                         />

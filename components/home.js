@@ -1,9 +1,19 @@
-import React, { Component } from 'react';
-import { Text, View, Button, StyleSheet } from 'react-native';
+import React, { Component, useEffect } from 'react';
+import { Animated, FlatList, ActivityIndicator, Text, TextInput, View, Button, Alert, Image, Modal } from 'react-native';
 import { TouchableOpacity } from 'react-native-web';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './stylesheet.js';
+import validation from './validation.js';
+
 
 export default class HomeScreen extends Component {
+
+  async componentDidMount() {
+    if (await AsyncStorage.getItem("whatsthatSessionToken")) {
+      this.props.navigation.navigate('AppHome')
+    }
+  }
+
   render() {
     return (
       <View style={[styles.background]}>

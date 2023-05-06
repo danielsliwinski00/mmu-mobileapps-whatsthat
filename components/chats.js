@@ -124,7 +124,7 @@ export default class Chats extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -325,7 +325,7 @@ export default class Chats extends Component {
             isLoading: false,
         })
         this.fetchChats();
-        this.interval = setInterval(() => { this.fetchChatsUpdate() }, 3000)
+        this.chatsInterval = setInterval(() => { this.fetchChatsUpdate() }, 3000)
         this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
         this.props.navigation.addListener('focus', async () => {
@@ -333,16 +333,16 @@ export default class Chats extends Component {
                 isLoading: false,
                 createChatName: '',
             })
-            this.interval = setInterval(() => { this.fetchChatsUpdate() }, 3000)
+            this.fetchChatsUpdate()
             this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
-            this.fetchChats()
         });
     }
 
     componentWillUnmount() {
-        clearInterval(this.interval),
+        clearInterval(this.chatsInterval),
         clearInterval(this.draftTimerID),
-        console.log('unmounted')
+        console.log('unmounted'),
+        console.log(this.chatsInterval, this.draftTimerID)
     }
 
     createChatNameChange = (text) => {
