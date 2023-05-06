@@ -37,7 +37,7 @@ export default class SignUp extends Component {
         else if (response.status == 400) {
           toast.show("Bad Request", { type: 'danger' })
         }
-        else {
+        else if (response.status == 500) {
           toast.show("Server Error", { type: 'danger' })
         }
 

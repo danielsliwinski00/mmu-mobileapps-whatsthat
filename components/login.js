@@ -31,7 +31,7 @@ export default class SignUp extends Component {
         } else if (response.status == 400) {
           toast.show("Invalid email or password", { type: 'danger' })
           throw "Invalid email or password"
-        } else {
+        } else if(response.status == 500){
           toast.show("Something went wrong", { type: 'danger' })
           throw "Something went wrong"
         }
@@ -73,7 +73,6 @@ export default class SignUp extends Component {
   }
 
   componentDidMount() {
-
   }
 
   render() {

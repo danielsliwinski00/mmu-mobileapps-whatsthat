@@ -13,7 +13,7 @@ export default class Blocked extends Component {
             contactsData: [],
             addingContact: false,
             userID: '',
-            draftMessages:[],
+            draftMessages: [],
         }
     }
 
@@ -47,7 +47,7 @@ export default class Blocked extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -70,7 +70,7 @@ export default class Blocked extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -135,7 +135,7 @@ export default class Blocked extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -194,7 +194,7 @@ export default class Blocked extends Component {
 
     componentWillUnmount() {
         clearInterval(this.draftTimerID),
-        console.log('unmounted')
+            console.log('unmounted')
     }
 
     render() {

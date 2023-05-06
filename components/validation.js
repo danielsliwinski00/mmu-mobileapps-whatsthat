@@ -17,4 +17,4 @@ const validation = (value, type) => {
     }
   }
 }
-  export default validation;
+export default validation;

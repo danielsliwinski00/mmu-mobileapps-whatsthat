@@ -53,7 +53,7 @@ export default class AddMember extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -83,7 +83,7 @@ export default class AddMember extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Something went wrong"
                 }
@@ -92,7 +92,7 @@ export default class AddMember extends Component {
                 this.setState({
                     contactsData: responseJson,
                     isLoading: false
-                },()=>{console.log(this.state.members, this.state.contactsData)})
+                }, () => { console.log(this.state.members, this.state.contactsData) })
             })
             .catch((error) => {
                 console.log(error);
@@ -138,7 +138,7 @@ export default class AddMember extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -201,7 +201,7 @@ export default class AddMember extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }

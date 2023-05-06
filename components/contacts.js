@@ -18,7 +18,7 @@ export default class Contacts extends Component {
             optionPanel: false,
             animateOptionsPanel: new Animated.Value(210),
             modalVisible: false,
-            draftMessages:[],
+            draftMessages: [],
         }
     }
 
@@ -35,21 +35,21 @@ export default class Contacts extends Component {
                 headers: { 'Content-Type': 'application/json', 'x-authorization': await AsyncStorage.getItem("whatsthatSessionToken") }
             })
             .then((response) => {
-                if (response.status==200) {
+                if (response.status == 200) {
                     return response.json();
                 }
-                else if (response.status==400) {
+                else if (response.status == 400) {
                     toast.show("Bad Request", { type: 'danger' })
                     throw "Bad Request"
                 }
-                else if (response.status==400) {
+                else if (response.status == 400) {
                     toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else{
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
-                }   
+                }
             })
             .then((responseJson) => {
                 this.setState({
@@ -76,7 +76,7 @@ export default class Contacts extends Component {
                     toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -125,7 +125,7 @@ export default class Contacts extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -168,7 +168,7 @@ export default class Contacts extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -230,7 +230,7 @@ export default class Contacts extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -284,9 +284,9 @@ export default class Contacts extends Component {
         this.fetchContacts();
         this.draftTimerID = setInterval(() => { this.checkDraftTimes() }, 10000)
 
-        if(this.state.contactsData.length <=0){
+        if (this.state.contactsData.length <= 0) {
             this.setState({
-                isLoading:false
+                isLoading: false
             })
         }
 
@@ -301,7 +301,7 @@ export default class Contacts extends Component {
 
     componentWillUnmount() {
         clearInterval(this.draftTimerID),
-        console.log('unmounted')
+            console.log('unmounted')
     }
 
     render() {

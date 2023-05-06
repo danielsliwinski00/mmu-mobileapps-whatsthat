@@ -37,7 +37,7 @@ export default class Chats extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorized"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -66,7 +66,7 @@ export default class Chats extends Component {
                     toast.show("Unauthorized", { type: 'danger' })
                     throw "Unauthorized"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }

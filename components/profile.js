@@ -45,7 +45,7 @@ export default class Profile extends Component {
           toast.show("Not Found", { type: 'danger' })
           throw 'Not Found'
         }
-        else {
+        else if (response.status == 500) {
           toast.show("Something went wrong", { type: 'danger' })
           throw 'Server Error'
         }
@@ -78,7 +78,7 @@ export default class Profile extends Component {
           toast.show("Not Found", { type: 'danger' })
           throw 'Not Found'
         }
-        else {
+        else if (response.status == 500) {
           toast.show("Something went wrong", { type: 'danger' })
           throw 'Server Error'
         }
@@ -116,7 +116,7 @@ export default class Profile extends Component {
           await AsyncStorage.removeItem("whatsthatSessionToken")
           this.props.navigation.navigate('Home');
         }
-        else {
+        else if (response.status == 500) {
           toast.show("Something went wrong", { type: 'danger' })
           throw "Server Error"
         }
@@ -158,7 +158,7 @@ export default class Profile extends Component {
         else if (response.status == 404) {
           toast.show("Not Found", { type: 'danger' })
         }
-        else {
+        else if (response.status == 500) {
           toast.show("Something went wrong", { type: 'danger' })
           throw "Server Error"
         }

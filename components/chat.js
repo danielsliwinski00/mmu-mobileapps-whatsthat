@@ -79,7 +79,7 @@ export default class Chat extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -124,7 +124,7 @@ export default class Chat extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -177,7 +177,7 @@ export default class Chat extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -226,7 +226,7 @@ export default class Chat extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -265,7 +265,7 @@ export default class Chat extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -725,8 +725,8 @@ export default class Chat extends Component {
 
     componentWillUnmount() {
         clearInterval(this.timerID),
-        clearInterval(this.draftTimerID),
-        console.log('unmounted')
+            clearInterval(this.draftTimerID),
+            console.log('unmounted')
     }
 
     render() {
@@ -789,7 +789,7 @@ export default class Chat extends Component {
                                     onPress={() => {
                                         this.setState({ modalVisible: false }),
                                             clearInterval(this.timerId),
-                                            this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid, members:this.state.chatData.members })
+                                            this.props.navigation.navigate('ChatInfo', { chatID: this.state.chatid, members: this.state.chatData.members })
                                     }}
                                 >
                                     <Text style={[styles.modalButtonText]}>

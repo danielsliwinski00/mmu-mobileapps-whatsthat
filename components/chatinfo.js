@@ -43,7 +43,7 @@ export default class ChatInfo extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -99,7 +99,7 @@ export default class ChatInfo extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -146,7 +146,7 @@ export default class ChatInfo extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -210,7 +210,7 @@ export default class ChatInfo extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if(response.status == 500){
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }

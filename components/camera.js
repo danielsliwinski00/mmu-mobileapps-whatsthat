@@ -38,7 +38,10 @@ export default function App() {
       })
       .then((response) => {
         if (response.status == 200) {
-          toast.show("Successfully Updated Photo", {type: 'success'});
+          toast.show("Successfully Updated Photo", { type: 'success' });
+        }
+        else if (response.status == 500) {
+          throw "Server Error"
         }
       })
       .catch((error) => {

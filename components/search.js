@@ -16,7 +16,7 @@ export default class Search extends Component {
             userID: '',
             searchText: '',
             searchID: '',
-            draftMessages:[],
+            draftMessages: [],
         }
     }
 
@@ -44,7 +44,7 @@ export default class Search extends Component {
                     toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorized"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Server Error", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -89,7 +89,7 @@ export default class Search extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -116,7 +116,7 @@ export default class Search extends Component {
                     toast.show("Unauthorised", { type: 'danger' })
                     throw "Unauthorised"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -189,7 +189,7 @@ export default class Search extends Component {
                     toast.show("Not Found", { type: 'danger' })
                     throw "Not Found"
                 }
-                else {
+                else if (response.status == 500) {
                     toast.show("Something went wrong", { type: 'danger' })
                     throw "Server Error"
                 }
@@ -248,7 +248,7 @@ export default class Search extends Component {
 
     componentWillUnmount() {
         clearInterval(this.draftTimerID),
-        console.log('unmounted')
+            console.log('unmounted')
     }
 
     render() {

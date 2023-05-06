@@ -544,10 +544,4 @@ const styles = StyleSheet.create({
     },
 })
 export default styles;
-/*
-        color: '#000000',
-        margin: 15,
-        fontSize: 24,
-        fontWeight: 600,
-*/
 
