@@ -21,8 +21,8 @@ export default class SignUp extends Component {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          "email": this.state.emailTest,
-          "password": this.state.passwordTest,
+          "email": this.state.email,
+          "password": this.state.password,
         })
       })
       .then((response) => {
