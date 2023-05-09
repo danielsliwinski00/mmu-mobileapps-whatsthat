@@ -192,7 +192,6 @@ export default class Profile extends Component {
     )
       .then((response) => {
         if (response.status == 200) {
-          toast.show('User Updated', { type: 'success' });
           this.setState({ profileEdit: false, password: '' });
           this.userInfo();
         } else if (response.status == 400) {

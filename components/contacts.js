@@ -394,8 +394,11 @@ export default class Contacts extends Component {
                           </Text>
                         </View>
                         <View style={[{ flex: 2, alignSelf: 'center' }]}>
-                          <TouchableOpacity onPress={() => { this.addContact(item.user_id); }}>
-                            <Image style={[this.state.styles.addContact]} source={require('./images/addcontact.png')} />
+                          <TouchableOpacity onPress={() => { this.removeContact(item.user_id); }}>
+                            <Image style={[this.state.styles.addContact]} source={require('./images/removecontact.png')} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => { this.blockContact(item.user_id); }}>
+                            <Image style={[this.state.styles.addContact]} source={require('./images/blockcontact.png')} />
                           </TouchableOpacity>
                         </View>
                       </View>
