@@ -1,67 +1,153 @@
+/* eslint-disable react/no-unstable-nested-components */
+/* eslint-disable global-require */
+/* eslint-disable react/jsx-filename-extension */
+/* eslint-disable react/prop-types */
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-param-reassign */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-var */
+/* eslint-disable react/no-access-state-in-setstate */
+/* eslint-disable quote-props */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable prefer-template */
+/* eslint-disable no-undef */
+/* eslint-disable no-throw-literal */
+/* eslint-disable no-else-return */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable eqeqeq */
+/* eslint-disable consistent-return */
+/* eslint-disable react/sort-comp */
+/* eslint-disable import/extensions */
+// eslint-disable-next-line no-else-return
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { Component } from 'react';
-import { Text, View, Button, StyleSheet } from 'react-native';
-import { TouchableOpacity } from 'react-native-web';
-import styles from './stylesheet.js';
-import Chats from './chats.js'
-import Contacts from './contacts.js'
-import Profile from './profile.js'
-import { NavigationContainer, } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { Component } from 'react';
+import { Text, View } from 'react-native';
+import Chats from './chats.js';
+import Contacts from './contacts.js';
+import Profile from './profile.js';
+
+import StylesLight from './stylesheet.js';
 
 const Tab = createBottomTabNavigator();
 
 export default class AppHome extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      style: 'light',
+      styles: StylesLight,
+      navLight: { fo: '#2A2F4F', unfo: '#ffffff' },
+      navDark: { fo: '#ffffff', unfo: '#ffffff' },
+      navColor: null,
+      navBackLight: { fo: '#ffffff', unfo: '#2a2f4f' },
+      navBackDark: { fo: '#595a63', unfo: '#2a2f4f' },
+      navBack: null,
+      loading: true,
+    };
+  }
 
-    constructor(props) {
-
-        super(props);
-        this.state = {
-            draftMessages: undefined
-        }
+  async setColorScheme() {
+    if (this.state.style == 'light') {
+      this.setState({
+        navColor: this.state.navLight,
+        navBack: this.state.navBackLight,
+      }, () => { this.setState({ loading: false }); });
+    } else {
+      this.setState({
+        navColor: this.state.navDark,
+        navBack: this.state.navBackDark,
+      }, () => { this.setState({ loading: false }); });
     }
+  }
 
-    async componentDidMount() {
-        if (await AsyncStorage.getItem("draftMessages")) {
-        }
-        else {
-            await AsyncStorage.setItem("draftMessages")
-        }
+  async componentDidMount() {
+    if (await AsyncStorage.getItem('draftMessages')) {
+      console.log('draft message exists');
+    } else {
+      await AsyncStorage.setItem('draftMessages');
     }
-    render() {
-        return (
-            <View style={[styles.background]}>
-                <Tab.Navigator
-                    screenOptions={{
-                        tabBarActiveBackgroundColor: '#ffffff', tabBarInactiveBackgroundColor: '#2A2F4F',
-                        unmountOnBlur: true
-                    }}
+    if (await AsyncStorage.getItem('colorScheme')) {
+      this.setState({
+        style: await AsyncStorage.getItem('colorScheme'),
+      }, () => { this.setColorScheme(); });
+    } else {
+      await AsyncStorage.setItem('colorScheme', 'light');
+      this.setColorScheme();
+    }
+  }
+
+  render() {
+    if (this.state.loading) {
+      return (<Text>Loading</Text>);
+    }
+    return (
+      <View style={[this.state.styles.background]}>
+        <Tab.Navigator
+          screenOptions={{
+            unmountOnBlur: true,
+          }}
+        >
+          <Tab.Screen
+            name="Chats"
+            component={Chats}
+            options={{
+              headerTitle: '',
+              headerTransparent: true,
+              tabBarLabel: ({ focused }) => (
+                <Text
+                  style={[this.state.styles.tabText,
+                    { color: focused ? this.state.navColor.fo : this.state.navColor.unfo }]}
                 >
-                    <Tab.Screen name='Chats' component={Chats}
-                        options={{
-                            headerTitle: "", headerTransparent: true,
-                            tabBarLabel: ({ focused, color, size }) => (<Text style={[styles.tabText, { color: focused ? '#2A2F4F' : '#ffffff' }]}>Chats</Text>),
-                            tabBarIcon: () => { }
-                        }}
-                    />
-                    <Tab.Screen name='Contacts' component={Contacts}
-                        options={{
-                            headerTitle: "", headerTransparent: true,
-                            tabBarLabel: ({ focused, color, size }) => (<Text style={[styles.tabText, { color: focused ? '#2A2F4F' : '#ffffff' }]}>Contacts</Text>),
-                            tabBarIcon: () => { },
-
-                        }}
-                    />
-                    <Tab.Screen name='Profile' component={Profile}
-                        options={{
-                            headerTitle: "", headerTransparent: true,
-                            tabBar: '#2A2F4F',
-                            tabBarLabel: ({ focused, color, size }) => (<Text style={[styles.tabText, { color: focused ? '#2A2F4F' : '#ffffff' }]}>Profile</Text>),
-                            tabBarIcon: () => { },
-                        }}
-                    />
-                </Tab.Navigator>
-            </View >
-        );
-    }
+                  Chats
+                </Text>
+              ),
+              tabBarIcon: () => { },
+              tabBarActiveBackgroundColor: this.state.navBack.fo,
+              tabBarInactiveBackgroundColor: this.state.navBack.unfo,
+            }}
+          />
+          <Tab.Screen
+            name="Contacts"
+            component={Contacts}
+            options={{
+              headerTitle: '',
+              headerTransparent: true,
+              tabBarLabel: ({ focused }) => (
+                <Text
+                  style={[this.state.styles.tabText,
+                    { color: focused ? this.state.navColor.fo : this.state.navColor.unfo }]}
+                >
+                  Contacts
+                </Text>
+              ),
+              tabBarIcon: () => { },
+              tabBarActiveBackgroundColor: this.state.navBack.fo,
+              tabBarInactiveBackgroundColor: this.state.navBack.unfo,
+            }}
+          />
+          <Tab.Screen
+            name="Profile"
+            component={Profile}
+            options={{
+              headerTitle: '',
+              headerTransparent: true,
+              tabBarLabel: ({ focused }) => (
+                <Text
+                  style={[this.state.styles.tabText,
+                    { color: focused ? this.state.navColor.fo : this.state.navColor.unfo }]}
+                >
+                  Profile
+                </Text>
+              ),
+              tabBarIcon: () => { },
+              tabBarActiveBackgroundColor: this.state.navBack.fo,
+              tabBarInactiveBackgroundColor: this.state.navBack.unfo,
+            }}
+          />
+        </Tab.Navigator>
+      </View>
+    );
+  }
 }
