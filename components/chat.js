@@ -389,7 +389,7 @@ export default class Chat extends Component {
     const yearString = yearTime.toString();
     var drafts = this.state.draftMessages;
     let hourInput = this.state.hour;
-    hourInput = Number(hourInput) + 1; // because of JSON making the time utc aka -1 hour
+    hourInput = Number(hourInput);
     const inputTime = new Date(yearString + '-' + this.state.month + '-' + this.state.day + 'T' + hourInput + ':' + this.state.minute + ':00');
     if (drafts.findIndex((data) => data.draftID == this.state.draftMessageID) == 0) {
       const index = drafts.findIndex((data) => data.draftID == this.state.draftMessageID);
